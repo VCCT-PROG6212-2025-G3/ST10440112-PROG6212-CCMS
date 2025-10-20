@@ -1,0 +1,98 @@
+@model IEnumerable<ST10440112_PROG6212_CCMS.Models.Claim>
+
+@{
+    ViewData["Title"] = "My Claims";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Claims</h2>
+        <a asp-action="Create" class="btn btn-primary" style="background-color: #9F7944; border-color: #9F7944;">
+            <i class="bi bi-plus-circle"></i> File New Claim
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header" style="background-color: #13325B; color: white;">
+            <h5 class="mb-0">All Claims</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Claim ID</th>
+                                <th>Status</th>
+                                <th>Total Hours</th>
+                                <th>Amount</th>
+                                <th>Date Submitted</th>
+                                <th>Documents</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var claim in Model)
+                            {
+                                <tr>
+                                    <td>@claim.ClaimId.ToString().Substring(0, 8)...</td>
+                                    <td>
+                                        @if (claim.ClaimStatus == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">@claim.ClaimStatus</span>
+                                        }
+                                        else if (claim.ClaimStatus == "Approved")
+                                        {
+                                            <span class="badge bg-success">@claim.ClaimStatus</span>
+                                        }
+                                        else if (claim.ClaimStatus == "Rejected")
+                                        {
+                                            <span class="badge bg-danger">@claim.ClaimStatus</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@claim.ClaimStatus</span>
+                                        }
+                                    </td>
+                                    <td>@claim.TotalHours hrs</td>
+                                    <td>R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))</td>
+                                    <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @if (claim.Documents != null && claim.Documents.Any())
+                                        {
+                                            <span class="badge bg-info">@claim.Documents.Count file(s)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No documents</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> You have not submitted any claims yet. Click "File New Claim" to get started.
+                </div>
+            }
+        </div>
+    </div>
+</div>

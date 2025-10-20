@@ -1,0 +1,145 @@
+@model ST10440112_PROG6212_CCMS.ViewModels.ClaimSubmissionViewModel
+
+@{
+    ViewData["Title"] = "File New Claim";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="mb-4">File New Claim</h2>
+
+            <form asp-action="Create" method="post" enctype="multipart/form-data" id="claimForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="card mb-4">
+                    <div class="card-header" style="background-color: #13325B; color: white;">
+                        <h5 class="mb-0">Working Hours</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="TeachingHours" class="form-label"></label>
+                                <input asp-for="TeachingHours" class="form-control hours-input" type="number" min="0" />
+                                <span asp-validation-for="TeachingHours" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="LecturePrepHours" class="form-label"></label>
+                                <input asp-for="LecturePrepHours" class="form-control hours-input" type="number" min="0" />
+                                <span asp-validation-for="LecturePrepHours" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="AdminHours" class="form-label"></label>
+                                <input asp-for="AdminHours" class="form-control hours-input" type="number" min="0" />
+                                <span asp-validation-for="AdminHours" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Total Time (Hrs)</label>
+                                <input type="text" class="form-control" id="totalHours" readonly value="0" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="HourlyRate" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R</span>
+                                    <input asp-for="HourlyRate" class="form-control" type="number" min="1" id="hourlyRate" />
+                                </div>
+                                <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>Total Amount: R<span id="totalAmount">0.00</span></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header" style="background-color: #13325B; color: white;">
+                        <h5 class="mb-0">Supporting Documents</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Upload Document(s)</label>
+                            <input type="file" name="Documents" class="form-control" id="fileInput" multiple accept=".pdf,.docx,.xlsx" />
+                            <small class="form-text text-muted">
+                                Allowed formats: PDF, DOCX, XLSX. Maximum file size: 5MB per file.
+                            </small>
+                            <span asp-validation-for="Documents" class="text-danger"></span>
+                        </div>
+
+                        <div id="fileList" class="mt-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="AdditionalNotes" class="form-label"></label>
+                            <textarea asp-for="AdditionalNotes" class="form-control" rows="4" placeholder="Add any additional comments or notes..."></textarea>
+                            <span asp-validation-for="AdditionalNotes" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="background-color: #9F7944; border-color: #9F7944;">
+                        <i class="bi bi-check-circle"></i> Submit Claim
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Calculate totals dynamically
+        function calculateTotals() {
+            const teaching = parseInt($('#TeachingHours').val()) || 0;
+            const prep = parseInt($('#LecturePrepHours').val()) || 0;
+            const admin = parseInt($('#AdminHours').val()) || 0;
+            const hourlyRate = parseInt($('#hourlyRate').val()) || 0;
+
+            const totalHours = teaching + prep + admin;
+            const totalAmount = totalHours * hourlyRate;
+
+            $('#totalHours').val(totalHours);
+            $('#totalAmount').text(totalAmount.toFixed(2));
+        }
+
+        // Update calculations on input change
+        $('.hours-input, #hourlyRate').on('input', calculateTotals);
+
+        // File selection handling
+        $('#fileInput').on('change', function() {
+            const files = this.files;
+            const fileList = $('#fileList');
+            fileList.empty();
+
+            if (files.length > 0) {
+                let html = '<div class="alert alert-success"><strong>Selected Files:</strong><ul class="mb-0 mt-2">';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    html += `<li>${file.name} (${fileSize} MB)</li>`;
+                }
+                
+                html += '</ul></div>';
+                fileList.html(html);
+            }
+        });
+
+        // Initialize calculations on page load
+        $(document).ready(function() {
+            calculateTotals();
+        });
+    </script>
+}

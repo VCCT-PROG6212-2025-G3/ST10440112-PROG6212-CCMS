@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
+using ST10440112_PROG6212_CCMS.Services;
 
 namespace ST10440112_PROG6212_CCMS
 {
@@ -15,6 +16,9 @@ namespace ST10440112_PROG6212_CCMS
             // Add db Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Register File Upload Service
+            builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
             var app = builder.Build();
 

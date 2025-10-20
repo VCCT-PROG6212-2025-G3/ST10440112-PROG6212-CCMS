@@ -1,0 +1,244 @@
+@model ST10440112_PROG6212_CCMS.Models.Claim
+
+@{
+    ViewData["Title"] = "Claim Details";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Claim Details</h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Claims
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0">Claim Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Claim ID:</strong>
+                            <p>@Model.ClaimId</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <p>
+                                @if (Model.ClaimStatus == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">@Model.ClaimStatus</span>
+                                }
+                                else if (Model.ClaimStatus == "Approved")
+                                {
+                                    <span class="badge bg-success">@Model.ClaimStatus</span>
+                                }
+                                else if (Model.ClaimStatus == "Rejected")
+                                {
+                                    <span class="badge bg-danger">@Model.ClaimStatus</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@Model.ClaimStatus</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Lecturer:</strong>
+                            <p>@Model.Lecturer?.Name</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Department:</strong>
+                            <p>@Model.Lecturer?.Department</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Total Hours:</strong>
+                            <p>@Model.TotalHours hours</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Hourly Rate:</strong>
+                            <p>R @Model.HourlyRate</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <strong>Total Amount:</strong>
+                            <h4 class="text-primary">R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))</h4>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Submission Date:</strong>
+                            <p>@Model.SubmissionDate.ToString("dd MMMM yyyy")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Approved Date:</strong>
+                            <p>@(Model.ApprovedDate.HasValue ? Model.ApprovedDate.Value.ToString("dd MMMM yyyy") : "Not yet approved")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Settled:</strong>
+                            <p>
+                                @if (Model.IsSettled)
+                                {
+                                    <span class="badge bg-success">Yes</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">No</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0">Supporting Documents</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Documents != null && Model.Documents.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var doc in Model.Documents)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <strong>@doc.Url.Split('/').Last()</strong>
+                                        <br />
+                                        <small class="text-muted">
+                                            Uploaded: @doc.UploadDate.ToString("dd MMM yyyy") | Type: @doc.DocType
+                                        </small>
+                                    </div>
+                                    <a href="/@doc.Url" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No documents attached to this claim.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header" style="background-color: #9F7944; color: white;">
+                    <h5 class="mb-0">Claim Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress-tracker">
+                        <div class="progress-step @(Model.ClaimStatus != null ? "active" : "")">
+                            <div class="progress-icon">
+                                <i class="bi bi-file-earmark-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <strong>Claim Filed</strong>
+                                <small>@Model.SubmissionDate.ToString("dd MMM yyyy")</small>
+                            </div>
+                        </div>
+
+                        <div class="progress-step @(Model.ClaimStatus == "Approved" || Model.ClaimStatus == "Rejected" ? "active" : "")">
+                            <div class="progress-icon">
+                                <i class="bi bi-person-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <strong>1st Approval</strong>
+                                <small>@(Model.ClaimStatus == "Pending" ? "Pending" : "Completed")</small>
+                            </div>
+                        </div>
+
+                        <div class="progress-step @(Model.ClaimStatus == "Approved" ? "active" : "")">
+                            <div class="progress-icon">
+                                <i class="bi bi-person-check-fill"></i>
+                            </div>
+                            <div class="progress-text">
+                                <strong>2nd Approval</strong>
+                                <small>@(Model.ClaimStatus == "Approved" ? "Completed" : "Pending")</small>
+                            </div>
+                        </div>
+
+                        <div class="progress-step @(Model.ClaimStatus == "Approved" && Model.IsSettled ? "active" : "")">
+                            <div class="progress-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <div class="progress-text">
+                                <strong>Outcome</strong>
+                                <small>@(Model.IsSettled ? "Settled" : Model.ClaimStatus)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .progress-tracker {
+            position: relative;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        .progress-step.active {
+            opacity: 1;
+        }
+
+        .progress-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #6c757d;
+            margin-right: 15px;
+        }
+
+        .progress-step.active .progress-icon {
+            background-color: #13325B;
+            color: white;
+        }
+
+        .progress-text strong {
+            display: block;
+            font-size: 14px;
+        }
+
+        .progress-text small {
+            display: block;
+            color: #6c757d;
+            font-size: 12px;
+        }
+    </style>
+}
