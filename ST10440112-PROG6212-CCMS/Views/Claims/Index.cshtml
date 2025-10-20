@@ -48,19 +48,23 @@
                                     <td>
                                         @if (claim.ClaimStatus == "Pending")
                                         {
-                                            <span class="badge bg-warning text-dark">@claim.ClaimStatus</span>
+                                            <span class="badge" style="background-color: #fff3cd; color: #856404;">@claim.ClaimStatus</span>
                                         }
                                         else if (claim.ClaimStatus == "Approved")
                                         {
-                                            <span class="badge bg-success">@claim.ClaimStatus</span>
+                                            <span class="badge" style="background-color: #d4edda; color: #155724;">@claim.ClaimStatus</span>
                                         }
                                         else if (claim.ClaimStatus == "Rejected")
                                         {
-                                            <span class="badge bg-danger">@claim.ClaimStatus</span>
+                                            <span class="badge" style="background-color: #f8d7da; color: #721c24;">@claim.ClaimStatus</span>
+                                        }
+                                        else if (claim.ClaimStatus == "Verified")
+                                        {
+                                            <span class="badge" style="background-color: #d1ecf1; color: #0c5460;">@claim.ClaimStatus</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">@claim.ClaimStatus</span>
+                                            <span class="badge" style="background-color: #e2e3e5; color: #383d41;">@claim.ClaimStatus</span>
                                         }
                                     </td>
                                     <td>@claim.TotalHours hrs</td>

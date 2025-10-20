@@ -1,0 +1,210 @@
+@model IEnumerable<ST10440112_PROG6212_CCMS.Models.Claim>
+
+@{
+    ViewData["Title"] = "Review & Approve Claims";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Review & Approve Claims</h2>
+        <a asp-action="Dashboard" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header" style="background-color: #13325B; color: white;">
+            <h5 class="mb-0">Pending Claims for Review</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Claim ID</th>
+                                <th>Lecturer</th>
+                                <th>Documents</th>
+                                <th>Review Status</th>
+                                <th>Full Status</th>
+                                <th>Total Hours</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var claim in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@claim.ClaimId.ToString().Substring(0, 13)...</strong>
+                                    </td>
+                                    <td>
+                                        <strong>@claim.Lecturer?.Name</strong><br />
+                                        <small class="text-muted">@claim.Lecturer?.Department</small>
+                                    </td>
+                                    <td>
+                                        @if (claim.Documents != null && claim.Documents.Any())
+                                        {
+                                            <div class="mb-1">
+                                                @foreach (var doc in claim.Documents)
+                                                {
+                                                    <span class="badge bg-secondary me-1">@doc.DocType</span>
+                                                }
+                                            </div>
+                                            <a href="#" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#documentsModal-@claim.ClaimId">
+                                                <i class="bi bi-files"></i> View (@claim.Documents.Count)
+                                            </a>
+
+                                            <!-- Documents Modal -->
+                                            <div class="modal fade" id="documentsModal-@claim.ClaimId" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header" style="background-color: #13325B; color: white;">
+                                                            <h5 class="modal-title">Supporting Documents</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="list-group">
+                                                                @foreach (var doc in claim.Documents)
+                                                                {
+                                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <div>
+                                                                            <i class="bi bi-file-earmark-text"></i>
+                                                                            <strong>@doc.Url.Split('/').Last()</strong><br />
+                                                                            <small class="text-muted">Type: @doc.DocType | Uploaded: @doc.UploadDate.ToString("dd MMM yyyy")</small>
+                                                                        </div>
+                                                                        <a href="/@doc.Url" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="bi bi-download"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No documents</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge" style="background-color: #d4edda; color: #155724;">Approved</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" style="background-color: #fff3cd; color: #856404;">Pending</span>
+                                    </td>
+                                    <td>@claim.TotalHours hrs</td>
+                                    <td><strong>R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))</strong></td>
+                                    <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal-@claim.ClaimId">
+                                                <i class="bi bi-check-circle"></i> Verify
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-@claim.ClaimId">
+                                                <i class="bi bi-x-circle"></i> Reject
+                                            </button>
+                                        </div>
+
+                                        <!-- Verify Modal -->
+                                        <div class="modal fade" id="verifyModal-@claim.ClaimId" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form asp-action="VerifyClaim" method="post">
+                                                        <input type="hidden" name="claimId" value="@claim.ClaimId" />
+                                                        <input type="hidden" name="action" value="verify" />
+                                                        <div class="modal-header bg-success text-white">
+                                                            <h5 class="modal-title">Verify Claim</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to verify this claim and send it to the Academic Manager for final approval?</p>
+                                                            <div class="alert alert-info">
+                                                                <strong>Claim Details:</strong><br />
+                                                                Lecturer: @claim.Lecturer?.Name<br />
+                                                                Hours: @claim.TotalHours<br />
+                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Comments (Optional)</label>
+                                                                <textarea name="comments" class="form-control" rows="3" placeholder="Add any comments..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-success">Verify Claim</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Reject Modal -->
+                                        <div class="modal fade" id="rejectModal-@claim.ClaimId" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form asp-action="VerifyClaim" method="post">
+                                                        <input type="hidden" name="claimId" value="@claim.ClaimId" />
+                                                        <input type="hidden" name="action" value="reject" />
+                                                        <div class="modal-header bg-danger text-white">
+                                                            <h5 class="modal-title">Reject Claim</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to reject this claim?</p>
+                                                            <div class="alert alert-warning">
+                                                                <strong>Claim Details:</strong><br />
+                                                                Lecturer: @claim.Lecturer?.Name<br />
+                                                                Hours: @claim.TotalHours<br />
+                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
+                                                                <textarea name="comments" class="form-control" rows="3" placeholder="Please provide a reason for rejection..." required></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-danger">Reject Claim</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i> No pending claims to review. All claims have been processed!
+                </div>
+            }
+        </div>
+    </div>
+</div>

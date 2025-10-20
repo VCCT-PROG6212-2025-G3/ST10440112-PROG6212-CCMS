@@ -32,6 +32,18 @@
 
                     <!-- User Info and Profile Icon -->
                     <div class="d-flex align-items-center">
+                        <!-- Role Switcher Dropdown -->
+                        <div class="dropdown me-3">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="roleSwitcher" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-gear"></i> Switch Role
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="roleSwitcher">
+                                <li><a class="dropdown-item" href="/Home/Index"><i class="bi bi-person"></i> Lecturer</a></li>
+                                <li><a class="dropdown-item" href="/Admin/Dashboard"><i class="bi bi-shield-check"></i> Programme Coordinator</a></li>
+                                <li><a class="dropdown-item" href="/Admin/ManagerReview"><i class="bi bi-briefcase"></i> Academic Manager</a></li>
+                            </ul>
+                        </div>
+
                         <div class="text-end me-2">
                             <div style="font-size: 0.95rem; font-weight: 500; color: #333; line-height: 1.2;">
                                 Michael Jones
