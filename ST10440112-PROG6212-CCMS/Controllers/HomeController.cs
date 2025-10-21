@@ -47,6 +47,7 @@ public class HomeController : Controller
             var recentClaims = await _context.Claims
                 .Where(c => c.LecturerId == lecturer.LecturerId)
                 .Include(c => c.Documents)
+                .Include(c => c.Comments)
                 .OrderByDescending(c => c.SubmissionDate)
                 .Take(7)
                 .ToListAsync();

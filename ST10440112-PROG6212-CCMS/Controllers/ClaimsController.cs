@@ -147,6 +147,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 var claim = await _context.Claims
                     .Include(c => c.Lecturer)
                     .Include(c => c.Documents)
+                    .Include(c => c.Comments)
                     .FirstOrDefaultAsync(m => m.ClaimId == id);
 
                 if (claim == null)

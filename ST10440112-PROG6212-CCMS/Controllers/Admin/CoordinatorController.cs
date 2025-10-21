@@ -39,6 +39,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers.Admin
                 var recentClaims = await _context.Claims
                     .Include(c => c.Lecturer)
                     .Include(c => c.Documents)
+                    .Include(c => c.Comments)
                     .OrderByDescending(c => c.SubmissionDate)
                     .Take(10)
                     .ToListAsync();
@@ -126,6 +127,38 @@ namespace ST10440112_PROG6212_CCMS.Controllers.Admin
             {
                 _logger.LogError(ex, $"Error verifying claim: {claimId}");
                 TempData["ErrorMessage"] = "An error occurred while processing the claim.";
+                return RedirectToAction(nameof(Review));
+            }
+        }
+
+        // GET: Admin/Coordinator/ReviewDetails/5
+        [HttpGet("/Admin/Coordinator/ReviewDetails/{id}")]
+        public async Task<IActionResult> ReviewDetails(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var claim = await _context.Claims
+                    .Include(c => c.Lecturer)
+                    .Include(c => c.Documents)
+                    .Include(c => c.Comments)
+                    .FirstOrDefaultAsync(m => m.ClaimId == id);
+
+                if (claim == null)
+                {
+                    return NotFound();
+                }
+
+                return View("~/Views/Admin/ReviewDetails.cshtml", claim);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error loading review details for claim: {id}");
+                TempData["ErrorMessage"] = "Error loading claim details.";
                 return RedirectToAction(nameof(Review));
             }
         }

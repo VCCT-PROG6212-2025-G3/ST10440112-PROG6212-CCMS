@@ -66,7 +66,11 @@
                     <h5 class="mb-0">Quick Actions</h5>
                 </div>
                 <div class="card-body">
-                    <a asp-action="CoordinatorReview" class="btn btn-primary me-2" style="background-color: #9F7944; border-color: #9F7944;">
+                    @{
+                        var currentPath = Context.Request.Path.ToString().ToLower();
+                        var reviewAction = currentPath.Contains("/manager") ? "/Admin/Manager/Review" : "/Admin/Coordinator/Review";
+                    }
+                    <a href="@reviewAction" class="btn btn-primary me-2" style="background-color: #9F7944; border-color: #9F7944;">
                         <i class="bi bi-file-earmark-check"></i> Review & Approve Claims
                     </a>
                     <a asp-controller="Claims" asp-action="Index" class="btn btn-outline-primary">
@@ -145,16 +149,84 @@
                                     <td>
                                         @if (claim.ClaimStatus == "Pending")
                                         {
-                                            <a asp-action="ReviewClaim" asp-route-id="@claim.ClaimId" class="btn btn-sm" style="background-color: #9F7944; color: white; border-color: #9F7944;">
-                                                <i class="bi bi-eye"></i> Review
-                                            </a>
+                                            @if (currentPath.Contains("/manager"))
+                                            {
+                                                <span class="text-muted">Awaiting Coordinator</span>
+                                            }
+                                            else
+                                            {
+                                                <a href="/Admin/Coordinator/Review" class="btn btn-sm" style="background-color: #9F7944; color: white; border-color: #9F7944;">
+                                                    <i class="bi bi-eye"></i> Review
+                                                </a>
+                                            }
+                                        }
+                                        else if (claim.ClaimStatus == "Verified")
+                                        {
+                                            @if (currentPath.Contains("/manager"))
+                                            {
+                                                <a href="/Admin/Manager/Review" class="btn btn-sm" style="background-color: #9F7944; color: white; border-color: #9F7944;">
+                                                    <i class="bi bi-eye"></i> Approve
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge" style="background-color: #d1ecf1; color: #0c5460;">Verified</span>
+                                            }
                                         }
                                         else
                                         {
-                                            <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-link p-0" style="color: #9F7944; text-decoration: none;">
+                                            <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;">
                                                 <i class="bi bi-eye" style="font-size: 1.2rem;"></i>
                                             </a>
+                                            <button class="btn btn-sm btn-link p-0" style="color: #9F7944; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#commentsModal-@claim.ClaimId">
+                                                <i class="bi bi-chat" style="font-size: 1.2rem;"></i>
+                                            </button>
                                         }
+
+                                        <!-- Comments Modal -->
+                                        <div class="modal fade" id="commentsModal-@claim.ClaimId" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header" style="background-color: #13325B; color: white;">
+                                                        <h5 class="modal-title">Review Comments</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-2">
+                                                            <strong>Claim ID:</strong> @claim.ClaimId.ToString().Substring(0, 13)...
+                                                        </div>
+                                                        <hr />
+                                                        @if (claim.Comments != null && claim.Comments.Any())
+                                                        {
+                                                            @foreach (var comment in claim.Comments.OrderByDescending(c => c.CreatedDate))
+                                                            {
+                                                                <div class="card mb-3" style="border-left: 4px solid #9F7944;">
+                                                                    <div class="card-body">
+                                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                            <div>
+                                                                                <strong style="color: #13325B;">@comment.AuthorName</strong>
+                                                                                <span class="badge bg-secondary ms-2">@comment.AuthorRole</span>
+                                                                            </div>
+                                                                            <small class="text-muted">@comment.CreatedDate.ToString("dd MMM yyyy")</small>
+                                                                        </div>
+                                                                        <p class="mb-0">@comment.CommentText</p>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="alert alert-info">
+                                                                <i class="bi bi-info-circle"></i> No comments yet.
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             }

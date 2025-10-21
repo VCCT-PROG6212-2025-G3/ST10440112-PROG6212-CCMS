@@ -119,78 +119,9 @@
                                     <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal-@claim.ClaimId">
-                                                <i class="bi bi-check-circle"></i> Verify
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-@claim.ClaimId">
-                                                <i class="bi bi-x-circle"></i> Reject
-                                            </button>
-                                        </div>
-
-                                        <!-- Verify Modal -->
-                                        <div class="modal fade" id="verifyModal-@claim.ClaimId" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <form asp-controller="Coordinator" asp-action="VerifyClaim" method="post">
-                                                        <input type="hidden" name="claimId" value="@claim.ClaimId" />
-                                                        <input type="hidden" name="action" value="verify" />
-                                                        <div class="modal-header bg-success text-white">
-                                                            <h5 class="modal-title">Verify Claim</h5>
-                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <p>Are you sure you want to verify this claim and send it to the Academic Manager for final approval?</p>
-                                                            <div class="alert alert-info">
-                                                                <strong>Claim Details:</strong><br />
-                                                                Lecturer: @claim.Lecturer?.Name<br />
-                                                                Hours: @claim.TotalHours<br />
-                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Comments (Optional)</label>
-                                                                <textarea name="comments" class="form-control" rows="3" placeholder="Add any comments..."></textarea>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-success">Verify Claim</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Reject Modal -->
-                                        <div class="modal fade" id="rejectModal-@claim.ClaimId" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <form asp-controller="Coordinator" asp-action="VerifyClaim" method="post">
-                                                        <input type="hidden" name="claimId" value="@claim.ClaimId" />
-                                                        <input type="hidden" name="action" value="reject" />
-                                                        <div class="modal-header bg-danger text-white">
-                                                            <h5 class="modal-title">Reject Claim</h5>
-                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <p>Are you sure you want to reject this claim?</p>
-                                                            <div class="alert alert-warning">
-                                                                <strong>Claim Details:</strong><br />
-                                                                Lecturer: @claim.Lecturer?.Name<br />
-                                                                Hours: @claim.TotalHours<br />
-                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
-                                                                <textarea name="comments" class="form-control" rows="3" placeholder="Please provide a reason for rejection..." required></textarea>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-danger">Reject Claim</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
+                                            <a href="/Admin/Coordinator/ReviewDetails/@claim.ClaimId" class="btn btn-sm" style="background-color: #9F7944; color: white; border-color: #9F7944;">
+                                                <i class="bi bi-eye"></i> Review Details
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>

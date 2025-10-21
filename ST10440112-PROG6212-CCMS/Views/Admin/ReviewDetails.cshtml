@@ -1,0 +1,387 @@
+@model ST10440112_PROG6212_CCMS.Models.Claim
+
+@{
+    ViewData["Title"] = "Review Claim Details";
+    var currentPath = Context.Request.Path.ToString().ToLower();
+    var isManager = currentPath.Contains("/manager");
+    var backAction = isManager ? "/Admin/Manager/Review" : "/Admin/Coordinator/Review";
+    var canTakeAction = (Model.ClaimStatus == "Pending" && !isManager) || (Model.ClaimStatus == "Verified" && isManager);
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Review Claim Details</h2>
+        <a href="@backAction" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Review List
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-8">
+            <!-- Claim Information -->
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Claim Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Claim ID:</strong>
+                            <p class="text-muted">@Model.ClaimId.ToString().Substring(0, 13)...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <p>
+                                @if (Model.ClaimStatus == "Pending")
+                                {
+                                    <span class="badge" style="background-color: #fff3cd; color: #856404; font-size: 1rem;">Pending</span>
+                                }
+                                else if (Model.ClaimStatus == "Verified")
+                                {
+                                    <span class="badge" style="background-color: #d1ecf1; color: #0c5460; font-size: 1rem;">Verified</span>
+                                }
+                                else if (Model.ClaimStatus == "Approved")
+                                {
+                                    <span class="badge" style="background-color: #d4edda; color: #155724; font-size: 1rem;">Approved</span>
+                                }
+                                else if (Model.ClaimStatus == "Rejected")
+                                {
+                                    <span class="badge" style="background-color: #f8d7da; color: #721c24; font-size: 1rem;">Rejected</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Lecturer:</strong>
+                            <p>@Model.Lecturer?.Name</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Department:</strong>
+                            <p>@Model.Lecturer?.Department</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Total Hours:</strong>
+                            <p class="text-primary"><strong>@Model.TotalHours hours</strong></p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Hourly Rate:</strong>
+                            <p>R @Model.HourlyRate.ToString("N2")</p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Total Amount:</strong>
+                            <h4 class="text-success">R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))</h4>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Submission Date:</strong>
+                            <p>@Model.SubmissionDate.ToString("dd MMMM yyyy, HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Approved Date:</strong>
+                            <p>@(Model.ApprovedDate.HasValue ? Model.ApprovedDate.Value.ToString("dd MMMM yyyy, HH:mm") : "Not yet approved")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0"><i class="bi bi-files"></i> Supporting Documents</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Documents != null && Model.Documents.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var doc in Model.Documents)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-earmark-text" style="font-size: 1.5rem; color: #9F7944;"></i>
+                                        <strong class="ms-2">@doc.Url.Split('/').Last()</strong>
+                                        <br />
+                                        <small class="text-muted ms-5">
+                                            Type: <span class="badge bg-secondary">@doc.DocType</span> | 
+                                            Uploaded: @doc.UploadDate.ToString("dd MMM yyyy")
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <a href="/@doc.Url" target="_blank" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <a href="/@doc.Url" download class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-download"></i> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No documents attached to this claim.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Comments & Review History</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Comments != null && Model.Comments.Any())
+                    {
+                        @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedDate))
+                        {
+                            <div class="card mb-3" style="border-left: 4px solid #9F7944;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong style="color: #13325B;">@comment.AuthorName</strong>
+                                            <span class="badge bg-secondary ms-2">@comment.AuthorRole</span>
+                                        </div>
+                                        <small class="text-muted">@comment.CreatedDate.ToString("dd MMM yyyy, HH:mm")</small>
+                                    </div>
+                                    <p class="mb-0">@comment.CommentText</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary">
+                            <i class="bi bi-chat"></i> No comments yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <!-- Actions -->
+            <div class="card mb-4 shadow">
+                <div class="card-header" style="background-color: #9F7944; color: white;">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Review Actions</h5>
+                </div>
+                <div class="card-body">
+                    @if (canTakeAction)
+                    {
+                        @if (isManager)
+                        {
+                            <button type="button" class="btn btn-success btn-lg w-100 mb-3" data-bs-toggle="modal" data-bs-target="#approveModal">
+                                <i class="bi bi-check-circle"></i> Approve Claim
+                            </button>
+                            <button type="button" class="btn btn-danger btn-lg w-100 mb-3" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="bi bi-x-circle"></i> Reject Claim
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-success btn-lg w-100 mb-3" data-bs-toggle="modal" data-bs-target="#verifyModal">
+                                <i class="bi bi-check-circle"></i> Verify Claim
+                            </button>
+                            <button type="button" class="btn btn-danger btn-lg w-100 mb-3" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="bi bi-x-circle"></i> Reject Claim
+                            </button>
+                        }
+                        <hr />
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Important:</strong> Review all documents carefully before deciding.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            @if (Model.ClaimStatus == "Pending" && isManager)
+                            {
+                                <p class="mb-0">Awaiting Programme Coordinator verification.</p>
+                            }
+                            else if (Model.ClaimStatus == "Verified" && !isManager)
+                            {
+                                <p class="mb-0">Verified - awaiting Academic Manager approval.</p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">This claim has been @Model.ClaimStatus.ToLower().</p>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Summary -->
+            <div class="card shadow">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Quick Summary</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-file-earmark-text text-primary"></i>
+                            <strong>Documents:</strong> @(Model.Documents?.Count ?? 0) file(s)
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-chat text-info"></i>
+                            <strong>Comments:</strong> @(Model.Comments?.Count ?? 0)
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-clock text-warning"></i>
+                            <strong>Days Pending:</strong> @((DateTime.Now - Model.SubmissionDate).Days) days
+                        </li>
+                        <li>
+                            <i class="bi bi-cash text-success"></i>
+                            <strong>Amount:</strong> R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Verify Modal -->
+@if (!isManager && Model.ClaimStatus == "Pending")
+{
+    <div class="modal fade" id="verifyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/Admin/Coordinator/VerifyClaim" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="claimId" value="@Model.ClaimId" />
+                    <input type="hidden" name="action" value="verify" />
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Verify Claim</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Verify and send to Academic Manager for approval?</p>
+                        <div class="alert alert-info">
+                            <strong>Summary:</strong><br />
+                            Lecturer: @Model.Lecturer?.Name<br />
+                            Hours: @Model.TotalHours<br />
+                            Amount: R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comments (Optional)</label>
+                            <textarea name="comments" class="form-control" rows="3" placeholder="Add notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Verify & Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Approve Modal -->
+@if (isManager && Model.ClaimStatus == "Verified")
+{
+    <div class="modal fade" id="approveModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/Admin/Manager/ApproveClaim" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="claimId" value="@Model.ClaimId" />
+                    <input type="hidden" name="action" value="approve" />
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Approve Claim</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Give final approval to this claim?</p>
+                        <div class="alert alert-info">
+                            <strong>Summary:</strong><br />
+                            Lecturer: @Model.Lecturer?.Name<br />
+                            Hours: @Model.TotalHours<br />
+                            Amount: R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))<br />
+                            Status: Verified by Coordinator
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Final Comments (Optional)</label>
+                            <textarea name="comments" class="form-control" rows="3" placeholder="Add notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Reject Modal -->
+@if (canTakeAction)
+{
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="@(isManager ? "/Admin/Manager/ApproveClaim" : "/Admin/Coordinator/VerifyClaim")" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="claimId" value="@Model.ClaimId" />
+                    <input type="hidden" name="action" value="reject" />
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Reject Claim</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to reject this claim?</p>
+                        <div class="alert alert-warning">
+                            <strong>Summary:</strong><br />
+                            Lecturer: @Model.Lecturer?.Name<br />
+                            Hours: @Model.TotalHours<br />
+                            Amount: R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
+                            <textarea name="comments" class="form-control" rows="4" placeholder="Provide detailed reason..." required></textarea>
+                            <small class="text-muted">Visible to lecturer.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
