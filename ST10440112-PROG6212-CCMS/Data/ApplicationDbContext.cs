@@ -12,6 +12,7 @@ namespace ST10440112_PROG6212_CCMS.Data
         public DbSet<Lecturer> Lecturers { get; set; }
         public DbSet<Claim> Claims { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<ClaimComment> ClaimComments { get; set; }
         public DbSet<ProgrammeCoordinator> ProgrammeCoordinators { get; set; }
         public DbSet<AcademicManager> AcademicManagers { get; set; }
 
@@ -31,6 +32,13 @@ namespace ST10440112_PROG6212_CCMS.Data
                 .HasOne(d => d.Claim)
                 .WithMany(c => c.Documents)
                 .HasForeignKey(d => d.ClaimId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Claim-Comment relationship
+            modelBuilder.Entity<ClaimComment>()
+                .HasOne(cc => cc.Claim)
+                .WithMany(c => c.Comments)
+                .HasForeignKey(cc => cc.ClaimId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Configure Admin inheritance (TPH - Table Per Hierarchy)

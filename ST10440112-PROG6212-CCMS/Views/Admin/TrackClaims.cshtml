@@ -1,68 +1,24 @@
 @model IEnumerable<ST10440112_PROG6212_CCMS.Models.Claim>
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Track Claims";
+    var currentPath = Context.Request.Path.ToString().ToLower();
+    var isManager = currentPath.Contains("manager");
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Dashboard</h2>
-        <a asp-controller="Claims" asp-action="Create" class="btn btn-primary" style="background-color: #9F7944; border-color: #9F7944;">
-            <i class="bi bi-plus-circle"></i> File New Claim
-        </a>
+        <h2>Track Claims</h2>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title" style="font-weight: 600; color: #000;">Total Claims</h5>
-                    <h2 class="mb-2" style="font-weight: bold; color: #13325B; font-size: 2.5rem;">@ViewBag.TotalClaims</h2>
-                    <p class="mb-0 text-muted">All-Time Claims</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title" style="font-weight: 600; color: #000;">Approved Claims</h5>
-                    <h2 class="mb-2" style="font-weight: bold; color: #9F7944; font-size: 2.5rem;">@ViewBag.ApprovedClaims</h2>
-                    <p class="mb-0 text-muted">Reviewed and Approved</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title" style="font-weight: 600; color: #000;">Pending/Denied Claims</h5>
-                    <h2 class="mb-2" style="font-weight: bold; color: #ff8c00; font-size: 2.5rem;">@ViewBag.PendingClaims/@ViewBag.RejectedClaims</h2>
-                    <p class="mb-0 text-muted">Not yet reviewed</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title" style="font-weight: 600; color: #000;">Total Amount Claimed</h5>
-                    <h2 class="mb-2" style="font-weight: bold; color: #28a745; font-size: 2.5rem;">R@(ViewBag.TotalAmount.ToString("N0"))</h2>
-                    <p class="mb-0 text-muted">Rand Value of all claims</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Search and Sort -->
+    <!-- Search and Filter -->
     <div class="card mb-3">
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" id="searchInput" placeholder="Search claims...">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by Claim ID, Lecturer, or Status...">
                     </div>
                 </div>
                 <div class="col-md-4 text-end">
@@ -88,7 +44,11 @@
                         <thead style="background-color: #f8f9fa;">
                             <tr>
                                 <th>ClaimID</th>
-                                <th>Status</th>
+                                <th>Lecturer</th>
+                                <th>Department</th>
+                                <th>Documents</th>
+                                <th>Review Status</th>
+                                <th>Full Status</th>
                                 <th>Total Hours</th>
                                 <th>Amount</th>
                                 <th>Date</th>
@@ -99,11 +59,46 @@
                             @foreach (var claim in Model)
                             {
                                 <tr>
-                                    <td><strong>@claim.ClaimId.ToString().Substring(0, 13)</strong></td>
+                                    <td><strong>@claim.ClaimId.ToString().Substring(0, 13)...</strong></td>
+                                    <td>@claim.Lecturer?.Name</td>
+                                    <td>@claim.Lecturer?.Department</td>
+                                    <td>
+                                        @if (claim.Documents != null && claim.Documents.Any())
+                                        {
+                                            <div class="mb-1">
+                                                @foreach (var doc in claim.Documents)
+                                                {
+                                                    <span class="badge bg-secondary me-1">@doc.DocType</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No documents</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (claim.ClaimStatus == "Verified" || claim.ClaimStatus == "Approved")
+                                        {
+                                            <span class="badge" style="background-color: #d4edda; color: #155724;">Approved</span>
+                                        }
+                                        else if (claim.ClaimStatus == "Rejected")
+                                        {
+                                            <span class="badge" style="background-color: #f8d7da; color: #721c24;">Rejected</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background-color: #fff3cd; color: #856404;">Pending</span>
+                                        }
+                                    </td>
                                     <td>
                                         @if (claim.ClaimStatus == "Pending")
                                         {
                                             <span class="badge" style="background-color: #fff3cd; color: #856404;">Pending</span>
+                                        }
+                                        else if (claim.ClaimStatus == "Verified")
+                                        {
+                                            <span class="badge" style="background-color: #d1ecf1; color: #0c5460;">Verified</span>
                                         }
                                         else if (claim.ClaimStatus == "Approved")
                                         {
@@ -112,10 +107,6 @@
                                         else if (claim.ClaimStatus == "Rejected")
                                         {
                                             <span class="badge" style="background-color: #f8d7da; color: #721c24;">Rejected</span>
-                                        }
-                                        else if (claim.ClaimStatus == "Verified")
-                                        {
-                                            <span class="badge" style="background-color: #d1ecf1; color: #0c5460;">Verified</span>
                                         }
                                         else
                                         {
@@ -126,27 +117,24 @@
                                     <td><strong>R@((claim.TotalHours * claim.HourlyRate).ToString("N0"))</strong></td>
                                     <td>@claim.SubmissionDate.ToString("dd-MM-yyyy")</td>
                                     <td>
-                                        <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="View">
+                                        <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="View Details">
                                             <i class="bi bi-eye" style="font-size: 1.2rem;"></i>
                                         </a>
-                                        @if (claim.ClaimStatus == "Pending")
-                                        {
-                                            <a asp-controller="Claims" asp-action="AddDocuments" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="Add Supporting Document">
-                                                <i class="bi bi-file-earmark-plus" style="font-size: 1.2rem;"></i>
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none; opacity: 0.3;" title="Cannot add documents after review" disabled>
-                                                <i class="bi bi-file-earmark-plus" style="font-size: 1.2rem;"></i>
-                                            </button>
-                                        }
-                                        <button class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="Read Comments">
+                                        <button class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="Comments">
                                             <i class="bi bi-chat" style="font-size: 1.2rem;"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-link p-0" style="color: #9F7944; text-decoration: none;" title="Download Claim">
-                                            <i class="bi bi-download" style="font-size: 1.2rem;"></i>
-                                        </button>
+                                        @if (claim.ClaimStatus == "Approved")
+                                        {
+                                            <button class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="Download Report">
+                                                <i class="bi bi-download" style="font-size: 1.2rem;"></i>
+                                            </button>
+                                        }
+                                        @if (claim.ClaimStatus == "Verified" && isManager)
+                                        {
+                                            <button class="btn btn-sm btn-link p-0" style="color: #9F7944; text-decoration: none;" title="Withdraw Approval" onclick="alert('Feature coming soon')">
+                                                <i class="bi bi-x-circle" style="font-size: 1.2rem;"></i>
+                                            </button>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -158,7 +146,7 @@
             {
                 <div class="text-center py-5">
                     <i class="bi bi-inbox" style="font-size: 3rem; color: #6c757d;"></i>
-                    <p class="text-muted mt-3">No claims found. Click "File New Claim" to get started.</p>
+                    <p class="text-muted mt-3">No claims found.</p>
                 </div>
             }
         </div>

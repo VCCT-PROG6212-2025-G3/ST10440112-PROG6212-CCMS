@@ -22,7 +22,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             try
             {
                 var totalClaims = await _context.Claims.CountAsync();
-                var pendingClaims = await _context.Claims.CountAsync(c => c.ClaimStatus == "Pending");
+                var pendingClaims = await _context.Claims.CountAsync(c => c.ClaimStatus == "Pending" || c.ClaimStatus == "Verified");
                 var approvedClaims = await _context.Claims.CountAsync(c => c.ClaimStatus == "Approved");
                 var rejectedClaims = await _context.Claims.CountAsync(c => c.ClaimStatus == "Rejected");
                 var totalAmount = await _context.Claims
@@ -47,6 +47,11 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading admin dashboard");
+                ViewBag.TotalClaims = 0;
+                ViewBag.PendingClaims = 0;
+                ViewBag.ApprovedClaims = 0;
+                ViewBag.RejectedClaims = 0;
+                ViewBag.TotalAmount = 0;
                 return View(new List<Claim>());
             }
         }
@@ -137,6 +142,85 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 _logger.LogError(ex, $"Error verifying claim: {claimId}");
                 TempData["ErrorMessage"] = "An error occurred while processing the claim.";
                 return RedirectToAction(nameof(CoordinatorReview));
+            }
+        }
+        // GET: Admin/ManagerReview
+        public async Task<IActionResult> ManagerReview()
+        {
+            try
+            {
+                // Get all verified claims that need manager approval
+                var verifiedClaims = await _context.Claims
+                    .Include(c => c.Lecturer)
+                    .Include(c => c.Documents)
+                    .Where(c => c.ClaimStatus == "Verified")
+                    .OrderByDescending(c => c.SubmissionDate)
+                    .ToListAsync();
+
+                return View(verifiedClaims);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading manager review page");
+                return View(new List<Claim>());
+            }
+        }
+
+        // POST: Admin/ApproveClaim
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveClaim(Guid claimId, string action, string? comments)
+        {
+            try
+            {
+                var claim = await _context.Claims.FindAsync(claimId);
+                if (claim == null)
+                {
+                    return NotFound();
+                }
+
+                if (action == "approve")
+                {
+                    claim.ClaimStatus = "Approved";
+                    claim.ApprovedDate = DateTime.Now;
+                    TempData["SuccessMessage"] = "Claim has been approved successfully.";
+                }
+                else if (action == "reject")
+                {
+                    claim.ClaimStatus = "Rejected";
+                    TempData["SuccessMessage"] = "Claim has been rejected.";
+                }
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Claim {claimId} status updated to {claim.ClaimStatus} by Academic Manager");
+
+                return RedirectToAction(nameof(ManagerReview));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error approving/rejecting claim: {claimId}");
+                TempData["ErrorMessage"] = "An error occurred while processing the claim.";
+                return RedirectToAction(nameof(ManagerReview));
+            }
+        }
+        // GET: Admin/TrackClaims
+        public async Task<IActionResult> TrackClaims()
+        {
+            try
+            {
+                var allClaims = await _context.Claims
+                    .Include(c => c.Lecturer)
+                    .Include(c => c.Documents)
+                    .OrderByDescending(c => c.SubmissionDate)
+                    .ToListAsync();
+
+                return View(allClaims);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading track claims page");
+                return View(new List<Claim>());
             }
         }
     }

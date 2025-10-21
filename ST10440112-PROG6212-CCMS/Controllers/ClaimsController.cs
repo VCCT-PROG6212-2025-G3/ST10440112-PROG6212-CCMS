@@ -162,5 +162,105 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+        // GET: Claims/AddDocuments/5
+        public async Task<IActionResult> AddDocuments(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var claim = await _context.Claims
+                    .Include(c => c.Lecturer)
+                    .Include(c => c.Documents)
+                    .FirstOrDefaultAsync(m => m.ClaimId == id);
+
+                if (claim == null)
+                {
+                    return NotFound();
+                }
+
+                // Only allow adding documents if claim is still pending
+                if (claim.ClaimStatus != "Pending")
+                {
+                    TempData["ErrorMessage"] = "Cannot add documents to a claim that has already been reviewed.";
+                    return RedirectToAction(nameof(Details), new { id = claim.ClaimId });
+                }
+
+                return View(claim);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error loading add documents page for claim: {id}");
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: Claims/AddDocuments
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddDocuments(Guid claimId, List<IFormFile> documents)
+        {
+            try
+            {
+                if (documents == null || !documents.Any())
+                {
+                    TempData["ErrorMessage"] = "Please select at least one document to upload.";
+                    return RedirectToAction(nameof(AddDocuments), new { id = claimId });
+                }
+
+                var claim = await _context.Claims.FindAsync(claimId);
+                if (claim == null)
+                {
+                    return NotFound();
+                }
+
+                // Only allow adding documents if claim is still pending
+                if (claim.ClaimStatus != "Pending")
+                {
+                    TempData["ErrorMessage"] = "Cannot add documents to a claim that has already been reviewed.";
+                    return RedirectToAction(nameof(Details), new { id = claimId });
+                }
+
+                int uploadedCount = 0;
+                foreach (var file in documents)
+                {
+                    var uploadResult = await _fileUploadService.UploadFileAsync(file, claimId.ToString());
+
+                    if (uploadResult.Success)
+                    {
+                        var document = new Document
+                        {
+                            DocumentID = Guid.NewGuid(),
+                            ClaimId = claimId,
+                            Url = uploadResult.FilePath!,
+                            UploadDate = DateTime.Now,
+                            DocType = _fileUploadService.GetFileExtension(file.FileName)
+                        };
+
+                        _context.Documents.Add(document);
+                        uploadedCount++;
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Failed to upload file: {uploadResult.Message}");
+                        TempData["ErrorMessage"] = uploadResult.Message;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"{uploadedCount} document(s) uploaded successfully!";
+                return RedirectToAction(nameof(Details), new { id = claimId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding documents to claim");
+                TempData["ErrorMessage"] = "An error occurred while uploading documents. Please try again.";
+                return RedirectToAction(nameof(AddDocuments), new { id = claimId });
+            }
+        }
     }
 }

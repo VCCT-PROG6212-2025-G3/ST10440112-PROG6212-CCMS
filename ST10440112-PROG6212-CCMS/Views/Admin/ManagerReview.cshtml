@@ -1,12 +1,12 @@
 @model IEnumerable<ST10440112_PROG6212_CCMS.Models.Claim>
 
 @{
-    ViewData["Title"] = "Review & Approve Claims";
+    ViewData["Title"] = "Approve Claims - Academic Manager";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Review & Approve Claims</h2>
+        <h2>Approve Claims</h2>
         <a asp-action="Dashboard" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Back to Dashboard
         </a>
@@ -30,7 +30,7 @@
 
     <div class="card">
         <div class="card-header" style="background-color: #13325B; color: white;">
-            <h5 class="mb-0">Pending Claims for Review</h5>
+            <h5 class="mb-0">Verified Claims Awaiting Final Approval</h5>
         </div>
         <div class="card-body">
             @if (Model != null && Model.Any())
@@ -42,8 +42,8 @@
                                 <th>Claim ID</th>
                                 <th>Lecturer</th>
                                 <th>Documents</th>
-                                <th>Review Status</th>
-                                <th>Full Status</th>
+                                <th>Coordinator Status</th>
+                                <th>Manager Status</th>
                                 <th>Total Hours</th>
                                 <th>Amount</th>
                                 <th>Date</th>
@@ -109,51 +109,52 @@
                                         }
                                     </td>
                                     <td>
-                                        <span class="badge" style="background-color: #d4edda; color: #155724;">Approved</span>
+                                        <span class="badge" style="background-color: #d1ecf1; color: #0c5460;">Verified</span>
                                     </td>
                                     <td>
-                                        <span class="badge" style="background-color: #fff3cd; color: #856404;">Pending</span>
+                                        <span class="badge" style="background-color: #fff3cd; color: #856404;">Pending Approval</span>
                                     </td>
                                     <td>@claim.TotalHours hrs</td>
                                     <td><strong>R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))</strong></td>
                                     <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal-@claim.ClaimId">
-                                                <i class="bi bi-check-circle"></i> Verify
+                                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#approveModal-@claim.ClaimId">
+                                                <i class="bi bi-check-circle"></i> Approve
                                             </button>
                                             <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-@claim.ClaimId">
                                                 <i class="bi bi-x-circle"></i> Reject
                                             </button>
                                         </div>
 
-                                        <!-- Verify Modal -->
-                                        <div class="modal fade" id="verifyModal-@claim.ClaimId" tabindex="-1">
+                                        <!-- Approve Modal -->
+                                        <div class="modal fade" id="approveModal-@claim.ClaimId" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form asp-controller="Coordinator" asp-action="VerifyClaim" method="post">
+                                                    <form asp-controller="Manager" asp-action="ApproveClaim" method="post">
                                                         <input type="hidden" name="claimId" value="@claim.ClaimId" />
-                                                        <input type="hidden" name="action" value="verify" />
+                                                        <input type="hidden" name="action" value="approve" />
                                                         <div class="modal-header bg-success text-white">
-                                                            <h5 class="modal-title">Verify Claim</h5>
+                                                            <h5 class="modal-title">Approve Claim</h5>
                                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <p>Are you sure you want to verify this claim and send it to the Academic Manager for final approval?</p>
+                                                            <p>Are you sure you want to give final approval to this claim?</p>
                                                             <div class="alert alert-info">
                                                                 <strong>Claim Details:</strong><br />
                                                                 Lecturer: @claim.Lecturer?.Name<br />
                                                                 Hours: @claim.TotalHours<br />
-                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))
+                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))<br />
+                                                                Status: Verified by Programme Coordinator
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label class="form-label">Comments (Optional)</label>
-                                                                <textarea name="comments" class="form-control" rows="3" placeholder="Add any comments..."></textarea>
+                                                                <label class="form-label">Final Comments (Optional)</label>
+                                                                <textarea name="comments" class="form-control" rows="3" placeholder="Add any final comments..."></textarea>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-success">Verify Claim</button>
+                                                            <button type="submit" class="btn btn-success">Approve Claim</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -164,7 +165,7 @@
                                         <div class="modal fade" id="rejectModal-@claim.ClaimId" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form asp-controller="Coordinator" asp-action="VerifyClaim" method="post">
+                                                    <form asp-controller="Manager" asp-action="ApproveClaim" method="post">
                                                         <input type="hidden" name="claimId" value="@claim.ClaimId" />
                                                         <input type="hidden" name="action" value="reject" />
                                                         <div class="modal-header bg-danger text-white">
@@ -177,7 +178,8 @@
                                                                 <strong>Claim Details:</strong><br />
                                                                 Lecturer: @claim.Lecturer?.Name<br />
                                                                 Hours: @claim.TotalHours<br />
-                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))
+                                                                Amount: R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))<br />
+                                                                Status: Already verified by Programme Coordinator
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
@@ -202,7 +204,7 @@
             else
             {
                 <div class="alert alert-success">
-                    <i class="bi bi-check-circle"></i> No pending claims to review. All claims have been processed!
+                    <i class="bi bi-check-circle"></i> No verified claims awaiting approval. All claims have been processed!
                 </div>
             }
         </div>

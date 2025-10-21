@@ -1,0 +1,155 @@
+@model ST10440112_PROG6212_CCMS.Models.Claim
+
+@{
+    ViewData["Title"] = "Add Supporting Documents";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Add Supporting Documents</h2>
+        <a asp-action="Details" asp-route-id="@Model.ClaimId" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Claim
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0">Claim Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Claim ID:</strong>
+                            <p>@Model.ClaimId.ToString().Substring(0, 13)...</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <p><span class="badge" style="background-color: #fff3cd; color: #856404;">@Model.ClaimStatus</span></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Total Hours:</strong>
+                            <p>@Model.TotalHours hours</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Total Amount:</strong>
+                            <p class="text-success"><strong>R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <strong>Submission Date:</strong>
+                            <p>@Model.SubmissionDate.ToString("dd MMMM yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0">Current Documents</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Documents != null && Model.Documents.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var doc in Model.Documents)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <strong>@doc.Url.Split('/').Last()</strong>
+                                        <br />
+                                        <small class="text-muted">
+                                            Uploaded: @doc.UploadDate.ToString("dd MMM yyyy") | Type: @doc.DocType
+                                        </small>
+                                    </div>
+                                    <a href="/@doc.Url" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No documents attached to this claim yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header" style="background-color: #9F7944; color: white;">
+                    <h5 class="mb-0">Upload New Documents</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddDocuments" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="claimId" value="@Model.ClaimId" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Document(s)</label>
+                            <input type="file" name="documents" class="form-control" id="fileInput" multiple accept=".pdf,.docx,.xlsx" required />
+                            <small class="form-text text-muted">
+                                Allowed formats: PDF, DOCX, XLSX. Maximum file size: 5MB per file.
+                            </small>
+                        </div>
+
+                        <div id="fileList" class="mb-3"></div>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Note:</strong> You can only add documents while the claim status is "Pending". Once reviewed, no additional documents can be added.
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" style="background-color: #9F7944; border-color: #9F7944;">
+                                <i class="bi bi-upload"></i> Upload Documents
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // File selection handling
+        $('#fileInput').on('change', function() {
+            const files = this.files;
+            const fileList = $('#fileList');
+            fileList.empty();
+
+            if (files.length > 0) {
+                let html = '<div class="alert alert-success"><strong>Selected Files:</strong><ul class="mb-0 mt-2">';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    html += `<li>${file.name} (${fileSize} MB)</li>`;
+                }
+                
+                html += '</ul></div>';
+                fileList.html(html);
+            }
+        });
+    </script>
+}

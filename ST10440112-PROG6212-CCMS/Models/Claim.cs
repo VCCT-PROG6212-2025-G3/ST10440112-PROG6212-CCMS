@@ -42,5 +42,6 @@ namespace ST10440112_PROG6212_CCMS.Models
         public virtual Lecturer? Lecturer { get; set; }
 
         public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
+        public virtual ICollection<ClaimComment> Comments { get; set; } = new List<ClaimComment>();
     }
 }
