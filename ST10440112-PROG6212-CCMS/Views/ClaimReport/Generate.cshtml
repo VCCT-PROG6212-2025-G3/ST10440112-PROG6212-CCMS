@@ -1,0 +1,408 @@
+@model ST10440112_PROG6212_CCMS.Models.Claim
+
+@{
+    Layout = null;
+    var generatedDate = ViewBag.GeneratedDate ?? DateTime.Now;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Claim Report - @Model.ClaimId.ToString().Substring(0, 8)</title>
+    <style>
+        @@media print {
+            .no-print { display: none !important; }
+            body { margin: 0; padding: 20px; }
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        
+        .report-header {
+            border-bottom: 4px solid #13325B;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .university-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-placeholder {
+            width: 60px;
+            height: 60px;
+            background: #13325B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9F7944;
+            font-weight: bold;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        
+        .university-info h1 {
+            margin: 0;
+            color: #13325B;
+            font-size: 24px;
+        }
+        
+        .university-info p {
+            margin: 5px 0 0 0;
+            color: #9F7944;
+            font-size: 14px;
+        }
+        
+        .report-meta {
+            text-align: right;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .report-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .report-title h2 {
+            color: #13325B;
+            font-size: 28px;
+            margin: 0 0 10px 0;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-verified { background-color: #d1ecf1; color: #0c5460; }
+        .status-approved { background-color: #d4edda; color: #155724; }
+        .status-rejected { background-color: #f8d7da; color: #721c24; }
+        
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #13325B;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .info-item {
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .amount-highlight {
+            font-size: 24px;
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .documents-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .documents-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .documents-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .comment-card {
+            border-left: 4px solid #9F7944;
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .comment-author {
+            font-weight: bold;
+            color: #13325B;
+        }
+        
+        .comment-role {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .comment-date {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .comment-text {
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .report-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #dee2e6;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .actions {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #13325B;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0d2440;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <!-- Action Buttons (Hidden on Print) -->
+    <div class="actions no-print">
+        <button onclick="window.print()" class="btn btn-primary">
+            📄 Download as PDF
+        </button>
+        <a href="/Claims/Details/@Model.ClaimId" class="btn btn-secondary">
+            ← Back to Claim
+        </a>
+    </div>
+
+    <!-- Report Header -->
+    <div class="report-header">
+        <div class="university-logo">
+            <div class="logo-placeholder">NU</div>
+            <div class="university-info">
+                <h1>NEWLANDS UNIVERSITY</h1>
+                <p>Claims Management System</p>
+            </div>
+        </div>
+        <div class="report-meta">
+            <p><strong>Report Generated:</strong><br/>@generatedDate.ToString("dd MMMM yyyy, HH:mm")</p>
+        </div>
+    </div>
+
+    <!-- Report Title -->
+    <div class="report-title">
+        <h2>Monthly Claim Report</h2>
+        <p style="color: #666; margin: 10px 0;">
+            Claim ID: <strong>@Model.ClaimId</strong>
+        </p>
+        <span class="status-badge status-@Model.ClaimStatus.ToLower()">
+            @Model.ClaimStatus
+        </span>
+    </div>
+
+    <!-- Lecturer Information -->
+    <div class="section">
+        <div class="section-header">Lecturer Information</div>
+        <div class="section-content">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Name</div>
+                    <div class="info-value">@Model.Lecturer?.Name</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">@Model.Lecturer?.Email</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Department</div>
+                    <div class="info-value">@Model.Lecturer?.Department</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Lecturer ID</div>
+                    <div class="info-value">@Model.LecturerId.ToString().Substring(0, 13)...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claim Details -->
+    <div class="section">
+        <div class="section-header">Claim Details</div>
+        <div class="section-content">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Total Hours Worked</div>
+                    <div class="info-value">@Model.TotalHours hours</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Hourly Rate</div>
+                    <div class="info-value">R @Model.HourlyRate.ToString("N2")</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Submission Date</div>
+                    <div class="info-value">@Model.SubmissionDate.ToString("dd MMMM yyyy")</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Approved Date</div>
+                    <div class="info-value">
+                        @(Model.ApprovedDate.HasValue ? Model.ApprovedDate.Value.ToString("dd MMMM yyyy") : "Not yet approved")
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 30px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                <div class="info-label">TOTAL CLAIM AMOUNT</div>
+                <div class="amount-highlight">R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supporting Documents -->
+    <div class="section">
+        <div class="section-header">Supporting Documents (@(Model.Documents?.Count ?? 0))</div>
+        <div class="section-content">
+            @if (Model.Documents != null && Model.Documents.Any())
+            {
+                <ul class="documents-list">
+                    @foreach (var doc in Model.Documents)
+                    {
+                        <li>
+                            <div>
+                                <strong>📄 @doc.Url.Split('/').Last()</strong>
+                                <div style="font-size: 12px; color: #666;">
+                                    Type: @doc.DocType | Uploaded: @doc.UploadDate.ToString("dd MMM yyyy")
+                                </div>
+                            </div>
+                            <div style="color: #28a745;">✓ Attached</div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p style="color: #666; text-align: center; padding: 20px;">No documents attached to this claim.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Review Comments -->
+    <div class="section">
+        <div class="section-header">Review Comments & History (@(Model.Comments?.Count ?? 0))</div>
+        <div class="section-content">
+            @if (Model.Comments != null && Model.Comments.Any())
+            {
+                @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedDate))
+                {
+                    <div class="comment-card">
+                        <div class="comment-header">
+                            <div>
+                                <span class="comment-author">@comment.AuthorName</span>
+                                <span class="comment-role">@comment.AuthorRole</span>
+                            </div>
+                            <span class="comment-date">@comment.CreatedDate.ToString("dd MMM yyyy, HH:mm")</span>
+                        </div>
+                        <div class="comment-text">@comment.CommentText</div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="color: #666; text-align: center; padding: 20px;">No review comments available.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Report Footer -->
+    <div class="report-footer">
+        <p><strong>Newlands University - Contract Monthly Claim System</strong></p>
+        <p>This is an official claim report generated by the system.</p>
+        <p>For queries, contact: claims@newlands.ac.za | +27 (0)21 XXX XXXX</p>
+        <p style="margin-top: 10px; font-size: 11px;">
+            Report ID: @Model.ClaimId | Generated: @generatedDate.ToString("yyyy-MM-dd HH:mm:ss")
+        </p>
+    </div>
+</body>
+</html>

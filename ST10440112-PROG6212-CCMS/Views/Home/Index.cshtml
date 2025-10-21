@@ -144,9 +144,9 @@
                                         <button class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="Read Comments" data-bs-toggle="modal" data-bs-target="#commentsModal-@claim.ClaimId">
                                             <i class="bi bi-chat" style="font-size: 1.2rem;"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-link p-0" style="color: #9F7944; text-decoration: none;" title="Download Claim" onclick="window.print()">
+                                        <a href="/ClaimReport/Generate/@claim.ClaimId" target="_blank" class="btn btn-sm btn-link p-0" style="color: #9F7944; text-decoration: none;" title="Download Claim Report">
                                             <i class="bi bi-download" style="font-size: 1.2rem;"></i>
-                                        </button>
+                                        </a>
 
                                         <!-- Comments Modal -->
                                         <div class="modal fade" id="commentsModal-@claim.ClaimId" tabindex="-1">
