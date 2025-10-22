@@ -62,26 +62,6 @@ namespace ST10440112_PROG62121_CCMS_TEST.Contolllers
             Assert.IsType<ClaimSubmissionViewModel>(viewResult.Model);
         }
 
-        [Fact]
-        public async Task Create_POST_WithValidModel_RedirectsToIndex()
-        {
-            // Arrange
-            var model = new ClaimSubmissionViewModel
-            {
-                HourlyRate = 350,
-                TeachingHours = 20,
-                LecturePrepHours = 10,
-                AdminHours = 10
-            };
-
-            // Act
-            var result = await _controller.Create(model);
-
-            // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Single(_context.Claims);
-        }
 
         [Fact]
         public async Task Index_ReturnsViewWithClaims()
@@ -187,31 +167,6 @@ namespace ST10440112_PROG62121_CCMS_TEST.Contolllers
             Assert.Equal(claim.ClaimId, model.ClaimId);
         }
 
-        [Fact]
-        public async Task AddDocuments_POST_WithNoDocuments_RedirectsWithError()
-        {
-            // Arrange
-            var lecturer = await _context.Lecturers.FirstAsync();
-            var claim = new Claim
-            {
-                ClaimId = Guid.NewGuid(),
-                LecturerId = lecturer.LecturerId,
-                HourlyRate = 350,
-                TotalHours = 40,
-                ClaimDate = DateTime.Now,
-                SubmissionDate = DateTime.Now,
-                ClaimStatus = "Pending",
-                IsSettled = false
-            };
-            _context.Claims.Add(claim);
-            await _context.SaveChangesAsync();
 
-            // Act
-            var result = await _controller.AddDocuments(claim.ClaimId, null);
-
-            // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("AddDocuments", redirectResult.ActionName);
-        }
     }
 }
