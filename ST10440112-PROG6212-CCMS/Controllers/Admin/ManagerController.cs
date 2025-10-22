@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
 using ST10440112_PROG6212_CCMS.Models;
+using ST10440112_PROG6212_CCMS.Helpers;
 
 namespace ST10440112_PROG6212_CCMS.Controllers.Admin
 {
@@ -86,10 +87,25 @@ namespace ST10440112_PROG6212_CCMS.Controllers.Admin
         {
             try
             {
+                // Validate action parameter
+                if (string.IsNullOrWhiteSpace(action) || (action != "approve" && action != "reject"))
+                {
+                    TempData["ErrorMessage"] = "Invalid action specified.";
+                    return RedirectToAction(nameof(Review));
+                }
+
                 var claim = await _context.Claims.FindAsync(claimId);
                 if (claim == null)
                 {
+                    TempData["ErrorMessage"] = "Claim not found.";
                     return NotFound();
+                }
+
+                // Validate claim status
+                if (claim.ClaimStatus != "Verified")
+                {
+                    TempData["ErrorMessage"] = "Claim is not in verified status.";
+                    return RedirectToAction(nameof(Review));
                 }
 
                 if (action == "approve")
@@ -104,16 +120,25 @@ namespace ST10440112_PROG6212_CCMS.Controllers.Admin
                     TempData["SuccessMessage"] = "Claim has been rejected.";
                 }
 
-                // Add comment if provided
+                // Add comment if provided (with sanitization)
                 if (!string.IsNullOrWhiteSpace(comments))
                 {
+                    // Sanitize comment text to prevent XSS
+                    var sanitizedComment = InputSanitizer.SanitizeComment(comments);
+                    
+                    // Validate comment length
+                    if (sanitizedComment.Length > 1000)
+                    {
+                        sanitizedComment = sanitizedComment.Substring(0, 1000);
+                    }
+
                     var comment = new ClaimComment
                     {
                         CommentId = Guid.NewGuid(),
                         ClaimId = claimId,
                         AuthorName = "Janet Du Plessis",
                         AuthorRole = "Academic Manager",
-                        CommentText = comments,
+                        CommentText = sanitizedComment,
                         CreatedDate = DateTime.Now
                     };
                     _context.ClaimComments.Add(comment);
@@ -159,6 +184,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers.Admin
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error loading review details for claim: {id}");
+                TempData["ErrorMessage"] = "Error loading claim details.";
                 return RedirectToAction(nameof(Review));
             }
         }

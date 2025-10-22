@@ -1,0 +1,45 @@
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #13325B; color: white;">
+                <h5 class="modal-title" id="confirmationModalLabel">
+                    <i class="bi bi-question-circle"></i> Confirm Action
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmButton" style="background-color: #9F7944; border-color: #9F7944;">
+                    <i class="bi bi-check-circle"></i> Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global confirmation dialog function
+    function showConfirmation(message, callback) {
+        document.getElementById('confirmationMessage').textContent = message;
+        const confirmButton = document.getElementById('confirmButton');
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        
+        // Remove old event listeners
+        const newConfirmButton = confirmButton.cloneNode(true);
+        confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+        
+        // Add new event listener
+        newConfirmButton.addEventListener('click', function() {
+            modal.hide();
+            if (callback) callback();
+        });
+        
+        modal.show();
+    }
+</script>
