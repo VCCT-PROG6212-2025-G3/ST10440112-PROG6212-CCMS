@@ -12,16 +12,33 @@
         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
         <div class="card mb-4">
-            <div class="card-header" style="background-color: #13325B; color: white;">
-                <h5 class="mb-0"><i class="bi bi-clock"></i> Work Hours & Rate</h5>
+            <div class="card-header" style="background-color: #13325B; color: #FFF;">
+                <h5 class="mb-0"><i class="bi bi-clock"></i> Work Hours Breakdown</h5>
             </div>
             <div class="card-body">
                 <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="teachingHours" class="form-label">Teaching Time (Hrs)</label>
+                        <input type="number" class="form-control hours-input" id="teachingHours" min="0" max="999" value="0" />
+                        <small class="form-text text-muted">Classroom teaching hours</small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="lecturePrepHours" class="form-label">Lecture Prep Time (Hrs)</label>
+                        <input type="number" class="form-control hours-input" id="lecturePrepHours" min="0" max="999" value="0" />
+                        <small class="form-text text-muted">Preparation and planning</small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="adminHours" class="form-label">Admin Tasks Time (Hrs)</label>
+                        <input type="number" class="form-control hours-input" id="adminHours" min="0" max="999" value="0" />
+                        <small class="form-text text-muted">Marking and admin</small>
+                    </div>
+                </div>
+
+                <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label asp-for="TotalHours" class="form-label"></label>
-                        <input asp-for="TotalHours" class="form-control" type="number" step="0.5" min="0.5" max="200" />
+                        <label asp-for="TotalHours" class="form-label"><strong>Total Hours</strong></label>
+                        <input asp-for="TotalHours" class="form-control" type="number" step="0.5" min="0.5" max="200" readonly style="background-color: #f8f9fa; font-weight: bold;" />
                         <span asp-validation-for="TotalHours" class="text-danger"></span>
-                        <small class="form-text text-muted">Must be between 0.5 and 200 hours</small>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="HourlyRate" class="form-label"></label>
@@ -90,16 +107,24 @@
     <partial name="_ValidationScriptsPartial" />
     
     <script>
-        // Calculate total amount
+        // Calculate totals from breakdown
         function calculateTotals() {
-            const hours = parseFloat($('#TotalHours').val()) || 0;
+            const teaching = parseFloat($('#teachingHours').val()) || 0;
+            const prep = parseFloat($('#lecturePrepHours').val()) || 0;
+            const admin = parseFloat($('#adminHours').val()) || 0;
+            const totalHours = teaching + prep + admin;
             const rate = parseFloat($('#HourlyRate').val()) || 0;
-            const total = hours * rate;
+            
+            // Update total hours
+            $('#TotalHours').val(totalHours);
+            
+            // Calculate total amount
+            const total = totalHours * rate;
             $('#totalAmount').text('R ' + total.toFixed(2));
         }
 
         // Update calculations on input change
-        $('#TotalHours, #HourlyRate').on('input', calculateTotals);
+        $('.hours-input, #HourlyRate').on('input', calculateTotals);
 
         // Character count for additional notes
         $('#AdditionalNotes').on('input', function() {
@@ -156,12 +181,12 @@
 
         // Form validation before submit
         $('#claimForm').on('submit', function(e) {
-            const hours = parseFloat($('#TotalHours').val());
+            const totalHours = parseFloat($('#TotalHours').val());
             const rate = parseFloat($('#HourlyRate').val());
             
-            if (hours < 0.5 || hours > 200) {
+            if (totalHours < 0.5 || totalHours > 200) {
                 e.preventDefault();
-                alert('Hours must be between 0.5 and 200.');
+                alert('Total hours must be between 0.5 and 200.');
                 return false;
             }
             
