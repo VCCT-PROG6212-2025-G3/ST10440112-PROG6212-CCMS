@@ -1,1 +1,1 @@
-#Run Update-Database before running the app
+# Run Update-Database before running the app
