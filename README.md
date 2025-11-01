@@ -1,1 +1,1 @@
-# Run Update-Database before running the app
+# Run "Update-Database" in NuGet package manager Console before running the app
