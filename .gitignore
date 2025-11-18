@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /ST10440112-PROG6212-CCMS/wwwroot/uploads/2768309b-f2ce-4fd1-ad54-50f39c312cdb/65b98c00-a6b6-4ed9-8e14-b832ea90ecc4.pdf
+
+.idea
