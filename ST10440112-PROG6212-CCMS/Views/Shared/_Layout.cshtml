@@ -124,7 +124,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse">
-                    @if (currentPath.Contains("/admin/manager"))
+                    @if (User.IsInRole("AcademicManager"))
                     {
                         <!-- Manager Navigation -->
                         <ul class="navbar-nav">
@@ -148,7 +148,7 @@
                             </li>
                         </ul>
                     }
-                    else if (currentPath.Contains("/admin/"))
+                    else if (User.IsInRole("ProgrammeCoordinator"))
                     {
                         <!-- Coordinator Navigation -->
                         <ul class="navbar-nav">
@@ -168,6 +168,30 @@
                                 <a class="nav-link" asp-area="" asp-controller="Coordinator" asp-action="TrackClaims"
                                    style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
                                     <i class="bi bi-list-check"></i> Track Claims
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                    else if (User.IsInRole("HR"))
+                    {
+                        <!-- HR Navigation -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item me-2">
+                                <a class="nav-link" asp-area="" asp-controller="HR" asp-action="Dashboard"
+                                   style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
+                                    <i class="bi bi-house-door"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item me-2">
+                                <a class="nav-link" asp-area="" asp-controller="HR" asp-action="ManageLecturers"
+                                   style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
+                                    <i class="bi bi-people"></i> Manage Lecturers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="HR" asp-action="ApprovedClaims"
+                                   style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
+                                    <i class="bi bi-file-check"></i> Approved Claims
                                 </a>
                             </li>
                         </ul>
