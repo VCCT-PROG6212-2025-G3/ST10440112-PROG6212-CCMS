@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ST10440112_PROG6212_CCMS.Models
 {
     public class UserSession
     {
+        [Key]
         public Guid SessionId { get; set; }
         public string UserId { get; set; }
         public string Email { get; set; }

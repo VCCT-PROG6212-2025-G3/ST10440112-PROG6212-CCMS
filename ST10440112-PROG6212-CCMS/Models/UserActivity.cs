@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ST10440112_PROG6212_CCMS.Models
 {
     public class UserActivity
     {
+        [Key]
         public Guid ActivityId { get; set; }
         public string UserId { get; set; }
         public string Email { get; set; }
