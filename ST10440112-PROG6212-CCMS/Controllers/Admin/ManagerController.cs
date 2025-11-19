@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
@@ -6,6 +7,7 @@ using ST10440112_PROG6212_CCMS.Helpers;
 
 namespace ST10440112_PROG6212_CCMS.Controllers.Admin
 {
+    [Authorize(Roles = "AcademicManager")]
     [Route("Admin/Manager/[action]")]
     public class ManagerController : Controller
     {

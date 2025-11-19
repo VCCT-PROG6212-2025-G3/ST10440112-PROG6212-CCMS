@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
@@ -6,6 +7,7 @@ using ST10440112_PROG6212_CCMS.Models;
 
 namespace ST10440112_PROG6212_CCMS.Controllers;
 
+[Authorize(Roles = "Lecturer")]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;

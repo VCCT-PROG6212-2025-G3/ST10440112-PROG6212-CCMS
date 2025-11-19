@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
@@ -7,6 +8,7 @@ using ST10440112_PROG6212_CCMS.ViewModels;
 
 namespace ST10440112_PROG6212_CCMS.Controllers
 {
+    [Authorize(Roles = "Lecturer")]
     public class ClaimsController : Controller
     {
         private readonly ApplicationDbContext _context;

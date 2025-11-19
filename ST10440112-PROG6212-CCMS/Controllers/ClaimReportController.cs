@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
 
 namespace ST10440112_PROG6212_CCMS.Controllers
 {
+    [Authorize]
     public class ClaimReportController : Controller
     {
         private readonly ApplicationDbContext _context;
