@@ -47,6 +47,14 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                     if (result.Succeeded)
                     {
+                        // Add claims to the user
+                        var claims = new List<System.Security.Claims.Claim>
+                        {
+                            new System.Security.Claims.Claim("FullName", user.FullName ?? user.UserName ?? ""),
+                            new System.Security.Claims.Claim("Email", user.Email ?? "")
+                        };
+                        await _userManager.AddClaimsAsync(user, claims);
+
                         HttpContext.Session.SetString("UserId", user.Id);
                         HttpContext.Session.SetString("UserEmail", user.Email ?? "");
                         HttpContext.Session.SetString("UserName", user.FullName ?? "");
