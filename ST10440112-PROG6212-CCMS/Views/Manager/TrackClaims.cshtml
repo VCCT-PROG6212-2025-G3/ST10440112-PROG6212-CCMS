@@ -1,0 +1,109 @@
+@model List<ST10440112_PROG6212_CCMS.Models.Claim>
+
+@{
+    ViewData["Title"] = "Track Claims";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-list-check"></i> Track All Claims</h2>
+            <p class="text-muted">View claims and their approval status</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Count > 0)
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Summary</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Total Claims:</strong> @Model.Count
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Total Hours:</strong> @Model.Sum(c => c.TotalHours).ToString("F1")
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Total Value:</strong> R @Model.Sum(c => c.TotalHours * c.HourlyRate).ToString("N2")
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Approved:</strong> @Model.Count(c => c.ClaimStatus == "Approved")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead style="background-color: #13325B; color: white;">
+                    <tr>
+                        <th>Lecturer</th>
+                        <th>Claim Date</th>
+                        <th>Hours</th>
+                        <th>Hourly Rate</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Approved Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model)
+                    {
+                        var statusBadgeClass = claim.ClaimStatus switch
+                        {
+                            "Pending" => "bg-warning",
+                            "Verified" => "bg-info",
+                            "Approved" => "bg-success",
+                            "Rejected" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td>
+                                <strong>@claim.Lecturer?.Name ?? "Unknown"</strong><br>
+                                <small class="text-muted">@claim.Lecturer?.Email</small>
+                            </td>
+                            <td>@claim.ClaimDate.ToString("dd MMM yyyy")</td>
+                            <td>@claim.TotalHours.ToString("F1")</td>
+                            <td>R @claim.HourlyRate.ToString("N2")</td>
+                            <td>
+                                <span class="badge bg-info" style="font-size: 0.9rem;">
+                                    R @(claim.TotalHours * claim.HourlyRate).ToString("N2")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @statusBadgeClass">@claim.ClaimStatus</span>
+                            </td>
+                            <td>
+                                @if (claim.ApprovedDate.HasValue)
+                                {
+                                    <span>@claim.ApprovedDate.Value.ToString("dd MMM yyyy")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No claims to track at this time.
+        </div>
+    }
+</div>
