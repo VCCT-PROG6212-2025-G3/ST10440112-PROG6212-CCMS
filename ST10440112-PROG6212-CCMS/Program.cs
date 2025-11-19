@@ -41,6 +41,9 @@ namespace ST10440112_PROG6212_CCMS
             // Register Session Management Service
             builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
 
+            // Register Claim Validation Service
+            builder.Services.AddScoped<IClaimValidationService, ClaimValidationService>();
+
             // Add session support
             builder.Services.AddSession(options =>
             {
