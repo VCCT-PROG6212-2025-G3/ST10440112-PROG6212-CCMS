@@ -25,6 +25,14 @@ namespace ST10440112_PROG6212_CCMS.Filters
             }
 
             var controller = context.RouteData.Values["controller"]?.ToString()?.ToLower();
+            var action = context.RouteData.Values["action"]?.ToString()?.ToLower();
+
+            // Exempt Account controller from role-based access checks (handles login, logout, AccessDenied)
+            if (controller == "account")
+            {
+                return;
+            }
+
             var userRole = context.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
 
             // Define role-to-controller mappings
