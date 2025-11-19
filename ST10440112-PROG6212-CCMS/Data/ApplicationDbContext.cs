@@ -21,6 +21,11 @@ namespace ST10440112_PROG6212_CCMS.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure Lecturer properties
+            modelBuilder.Entity<Lecturer>()
+                .Property(l => l.HourlyRate)
+                .HasPrecision(10, 2);
+
             // Configure Lecturer-Claim relationship
             modelBuilder.Entity<Claim>()
                 .HasOne(c => c.Lecturer)
