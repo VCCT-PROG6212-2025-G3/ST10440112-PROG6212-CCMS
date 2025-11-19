@@ -336,7 +336,9 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 foreach (var claim in claimList)
                 {
                     var totalAmount = claim.TotalHours * claim.HourlyRate;
-                    csv.AppendLine($"\"{claim.Lecturer?.Name}\",\"{claim.Lecturer?.Email}\",{claim.ClaimDate:dd/MM/yyyy},{claim.TotalHours:F1},R {claim.HourlyRate:N2},R {totalAmount:N2},{claim.ApprovedDate:dd/MM/yyyy},{claim.ClaimStatus}");
+                    var lecturerName = claim.Lecturer?.Name ?? "Unknown";
+                    var lecturerEmail = claim.Lecturer?.Email ?? "";
+                    csv.AppendLine($"{lecturerName},{lecturerEmail},{claim.ClaimDate:dd/MM/yyyy},{claim.TotalHours:F1},R {claim.HourlyRate:N2},R {totalAmount:N2},{claim.ApprovedDate:dd/MM/yyyy},{claim.ClaimStatus}");
                 }
 
                 csv.AppendLine();
@@ -360,6 +362,9 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         private string GenerateInvoiceCSV(Claim claim)
         {
             var csv = new StringBuilder();
+            var unknownText = "Unknown";
+            var settledText = "Settled";
+            var pendingText = "Pending";
 
             csv.AppendLine("NEWLANDS UNIVERSITY");
             csv.AppendLine("Claims Management System - Invoice");
@@ -368,7 +373,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             csv.AppendLine($"Claim ID:,{claim.ClaimId:N}");
             csv.AppendLine();
             csv.AppendLine("LECTURER INFORMATION");
-            csv.AppendLine($"Name:,{claim.Lecturer?.Name ?? \"Unknown\"}");
+            csv.AppendLine($"Name:,{(claim.Lecturer?.Name ?? unknownText)}");
             csv.AppendLine($"Email:,{claim.Lecturer?.Email}");
             csv.AppendLine();
             csv.AppendLine("CLAIM DETAILS");
@@ -382,7 +387,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             csv.AppendLine($"Total Amount Due:,R {(claim.TotalHours * claim.HourlyRate):N2}");
             csv.AppendLine();
             csv.AppendLine($"Status:,{claim.ClaimStatus}");
-            csv.AppendLine($"Payment Status:,{(claim.IsSettled ? "Settled" : "Pending")}");
+            csv.AppendLine($"Payment Status:,{(claim.IsSettled ? settledText : pendingText)}");
 
             return csv.ToString();
         }
