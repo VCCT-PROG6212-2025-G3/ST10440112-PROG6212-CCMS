@@ -26,7 +26,7 @@
 
                         <div class="mb-3">
                             <label asp-for="Name" class="form-label">Full Name *</label>
-                            <input type="text" class="form-control @(ModelState.IsValid && !string.IsNullOrEmpty(Model.Name) ? "" : "")"
+                            <input type="text" class="form-control"
                                    asp-for="Name" required>
                             <span class="text-danger small" asp-validation-for="Name"></span>
                         </div>
