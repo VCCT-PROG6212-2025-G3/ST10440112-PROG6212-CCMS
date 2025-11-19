@@ -30,6 +30,8 @@
 
                         <input type="hidden" asp-for="LecturerId" />
                         <input type="hidden" asp-for="HourlyRate" />
+                        <input type="hidden" asp-for="ClaimStatus" />
+                        <input type="hidden" asp-for="SubmissionDate" />
 
                         <div class="mb-3">
                             <label asp-for="ClaimDate" class="form-label">Claim Date *</label>
@@ -51,14 +53,18 @@
 
                         <div class="card mb-3" style="background-color: #f8f9fa;">
                             <div class="card-body">
-                                <h6 class="card-title">Claim Summary</h6>
+                                <h6 class="card-title">Claim Calculation</h6>
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Hourly Rate:</strong></p>
-                                        <p id="hourlyRateDisplay">R @Model.HourlyRate.ToString("N2")</p>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><small class="text-muted">Hourly Rate (Fixed):</small></p>
+                                        <p id="hourlyRateDisplay" style="font-weight: 600;">R @Model.HourlyRate.ToString("N2")</p>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Total Amount:</strong></p>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><small class="text-muted">Hours Worked:</small></p>
+                                        <p id="hoursDisplay" style="font-weight: 600;">0.0</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><small class="text-muted"><strong>Total Amount:</strong></small></p>
                                         <p id="totalAmountDisplay" style="font-size: 1.25rem; color: #13325B; font-weight: 600;">R 0.00</p>
                                     </div>
                                 </div>
@@ -112,6 +118,9 @@
         function updateCalculation() {
             const hours = parseFloat(totalHoursInput.value) || 0;
             const total = hours * hourlyRate;
+
+            // Update display fields
+            document.getElementById('hoursDisplay').textContent = hours.toFixed(1);
             document.getElementById('totalAmountDisplay').textContent = 'R ' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
