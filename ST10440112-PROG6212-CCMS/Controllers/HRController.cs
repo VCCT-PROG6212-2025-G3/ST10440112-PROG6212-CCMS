@@ -392,6 +392,167 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             return csv.ToString();
         }
 
+        // GET: HR/BulkImport
+        public IActionResult BulkImport()
+        {
+            return View();
+        }
+
+        // POST: HR/ImportLecturersCSV
+        [HttpPost]
+        public async Task<IActionResult> ImportLecturersCSV(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    TempData["ErrorMessage"] = "Please select a CSV file to upload";
+                    return RedirectToAction(nameof(BulkImport));
+                }
+
+                if (!file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "File must be a CSV file";
+                    return RedirectToAction(nameof(BulkImport));
+                }
+
+                var importedCount = 0;
+                var errorCount = 0;
+                var errors = new List<string>();
+
+                using (var reader = new StreamReader(file.OpenReadStream()))
+                {
+                    var lineNumber = 0;
+                    var headerLine = await reader.ReadLineAsync();
+                    lineNumber++;
+
+                    // Validate header: Name,Email,Department,HourlyRate
+                    if (string.IsNullOrWhiteSpace(headerLine) ||
+                        !headerLine.Equals("Name,Email,Department,HourlyRate", StringComparison.OrdinalIgnoreCase))
+                    {
+                        TempData["ErrorMessage"] = "CSV header must be: Name,Email,Department,HourlyRate";
+                        return RedirectToAction(nameof(BulkImport));
+                    }
+
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        lineNumber++;
+
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+
+                        var parts = line.Split(',');
+
+                        if (parts.Length != 4)
+                        {
+                            errorCount++;
+                            errors.Add($"Line {lineNumber}: Invalid number of fields (expected 4)");
+                            continue;
+                        }
+
+                        var name = parts[0]?.Trim();
+                        var email = parts[1]?.Trim();
+                        var department = parts[2]?.Trim();
+                        var hourlyRateStr = parts[3]?.Trim();
+
+                        // Validate fields
+                        if (string.IsNullOrEmpty(name))
+                        {
+                            errorCount++;
+                            errors.Add($"Line {lineNumber}: Name is required");
+                            continue;
+                        }
+
+                        if (string.IsNullOrEmpty(email))
+                        {
+                            errorCount++;
+                            errors.Add($"Line {lineNumber}: Email is required");
+                            continue;
+                        }
+
+                        if (!decimal.TryParse(hourlyRateStr, out var hourlyRate) || hourlyRate <= 0)
+                        {
+                            errorCount++;
+                            errors.Add($"Line {lineNumber}: Hourly rate must be a valid positive number");
+                            continue;
+                        }
+
+                        // Check if lecturer already exists
+                        var existingLecturer = await _context.Lecturers
+                            .FirstOrDefaultAsync(l => l.Email == email);
+
+                        if (existingLecturer != null)
+                        {
+                            // Update existing lecturer
+                            existingLecturer.Name = name;
+                            existingLecturer.Department = department ?? existingLecturer.Department;
+                            existingLecturer.HourlyRate = hourlyRate;
+                            _context.Lecturers.Update(existingLecturer);
+                            importedCount++;
+                        }
+                        else
+                        {
+                            // Create new lecturer
+                            var lecturer = new Lecturer
+                            {
+                                LecturerId = Guid.NewGuid(),
+                                Name = name,
+                                Email = email,
+                                Department = department ?? "Unspecified",
+                                HourlyRate = hourlyRate
+                            };
+                            _context.Lecturers.Add(lecturer);
+                            importedCount++;
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                var message = $"Successfully imported {importedCount} lecturer(s)";
+                if (errorCount > 0)
+                {
+                    message += $" with {errorCount} error(s)";
+                    TempData["WarningMessage"] = message;
+                    TempData["Errors"] = string.Join("\n", errors.Take(10)); // Show first 10 errors
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = message;
+                }
+
+                return RedirectToAction(nameof(ManageLecturers));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error importing CSV");
+                TempData["ErrorMessage"] = $"Error importing file: {ex.Message}";
+                return RedirectToAction(nameof(BulkImport));
+            }
+        }
+
+        // GET: HR/ExportLecturersTemplate
+        public IActionResult ExportLecturersTemplate()
+        {
+            try
+            {
+                var csv = new StringBuilder();
+                csv.AppendLine("Name,Email,Department,HourlyRate");
+                csv.AppendLine("Michael Jones,michael.jones@example.com,Faculty of Science,350");
+                csv.AppendLine("Jane Smith,jane.smith@example.com,Faculty of Arts,320");
+
+                var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+                return File(bytes, "text/csv", "LecturersTemplate.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting template");
+                TempData["ErrorMessage"] = "Error exporting template";
+                return RedirectToAction(nameof(BulkImport));
+            }
+        }
+
         private bool LecturerExists(Guid id)
         {
             return _context.Lecturers.Any(e => e.LecturerId == id);

@@ -1,0 +1,91 @@
+@{
+    ViewData["Title"] = "Bulk Import Lecturers";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">Bulk Import Lecturers</h1>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["WarningMessage"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    @TempData["WarningMessage"]
+                    @if (TempData["Errors"] != null)
+                    {
+                        <hr>
+                        <h6>Errors encountered:</h6>
+                        <pre style="font-size: 0.85em; max-height: 200px; overflow-y: auto;">@TempData["Errors"]</pre>
+                    }
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Upload CSV File</h5>
+
+                    <form method="post" action="/HR/ImportLecturersCSV" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            <small class="form-text text-muted">CSV format required</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">Import Lecturers</button>
+                            <a href="/HR/ExportLecturersTemplate" class="btn btn-secondary">Download Template</a>
+                            <a href="/HR/ManageLecturers" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+
+                    <hr>
+
+                    <h6 class="mt-4">CSV Format Requirements</h6>
+                    <p>Your CSV file must have the following header and format:</p>
+                    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; font-family: monospace; overflow-x: auto;">
+                        Name,Email,Department,HourlyRate<br>
+                        Michael Jones,michael.jones@newlands.ac.za,Faculty of Science,350<br>
+                        Jane Smith,jane.smith@newlands.ac.za,Faculty of Arts,320<br>
+                        John Doe,john.doe@newlands.ac.za,Faculty of Commerce,400
+                    </div>
+
+                    <h6 class="mt-4">Rules:</h6>
+                    <ul>
+                        <li>Header row must be exactly: <code>Name,Email,Department,HourlyRate</code></li>
+                        <li>Name is required</li>
+                        <li>Email is required (used to identify duplicate lecturers)</li>
+                        <li>Department can be empty (defaults to "Unspecified")</li>
+                        <li>Hourly Rate must be a valid positive number</li>
+                        <li>If a lecturer with the same email exists, it will be updated</li>
+                        <li>New lecturers will be created if email doesn't exist</li>
+                    </ul>
+
+                    <h6 class="mt-4">Steps:</h6>
+                    <ol>
+                        <li>Click "Download Template" to get an example CSV file</li>
+                        <li>Fill in the template with your lecturer data</li>
+                        <li>Save as CSV format (.csv)</li>
+                        <li>Select your file and click "Import Lecturers"</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
