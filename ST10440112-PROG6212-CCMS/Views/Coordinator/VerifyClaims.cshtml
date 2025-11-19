@@ -133,7 +133,7 @@
     function verifyClaimPost(claimId) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '@Url.Action("VerifyClaim", "Coordinator")';
+        form.action = '/Coordinator/VerifyClaim';
 
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -142,7 +142,7 @@
 
         const token = document.querySelector('input[name="__RequestVerificationToken"]');
         if (token) {
-            form.appendChild(token.cloneNode());
+            form.appendChild(token.cloneNode(true));
         }
 
         form.appendChild(input);
