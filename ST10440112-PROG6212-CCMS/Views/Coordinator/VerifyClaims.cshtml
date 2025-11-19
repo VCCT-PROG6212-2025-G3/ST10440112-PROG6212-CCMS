@@ -36,7 +36,7 @@
     @if (Model.Count > 0)
     {
         <div class="mb-3">
-            <form method="post" asp-controller="Coordinator" asp-action="AutoVerifyAll">
+            <form method="post" asp-area="" asp-controller="Coordinator" asp-action="AutoVerifyAll">
                 <button type="submit" class="btn btn-warning" onclick="return confirm('Auto-verify all @Model.Count pending claims?')">
                     <i class="bi bi-lightning"></i> Auto-Verify All (@Model.Count)
                 </button>
@@ -75,7 +75,7 @@
                             <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <form method="post" asp-controller="Coordinator" asp-action="VerifyClaim" asp-route-id="@claim.ClaimId" style="display: inline;">
+                                    <form method="post" asp-area="" asp-controller="Coordinator" asp-action="VerifyClaim" asp-route-id="@claim.ClaimId" style="display: inline;">
                                         <button type="submit" class="btn btn-success" title="Verify this claim">
                                             <i class="bi bi-check-lg"></i> Verify
                                         </button>
@@ -107,7 +107,7 @@
                 <h5 class="modal-title" id="rejectModalLabel">Reject Claim</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" asp-controller="Coordinator" asp-action="RejectClaim" id="rejectForm">
+            <form method="post" asp-area="" asp-controller="Coordinator" asp-action="RejectClaim" id="rejectForm">
                 <div class="modal-body">
                     <input type="hidden" name="id" id="claimIdInput" />
                     <div class="mb-3">
