@@ -20,6 +20,10 @@ namespace ST10440112_PROG6212_CCMS.Models
         [StringLength(100, ErrorMessage = "Department cannot exceed 100 characters")]
         public string Department { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Hourly rate is required")]
+        [Range(100, 10000, ErrorMessage = "Hourly rate must be between 100 and 10000")]
+        public decimal HourlyRate { get; set; }
+
         // Navigation property
         public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
     }

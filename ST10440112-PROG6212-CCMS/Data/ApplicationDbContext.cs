@@ -60,7 +60,8 @@ namespace ST10440112_PROG6212_CCMS.Data
                     LecturerId = lecturerId,
                     Name = "Michael Jones",
                     Email = "michael.jones@newlands.ac.za",
-                    Department = "Faculty of Science"
+                    Department = "Faculty of Science",
+                    HourlyRate = 350
                 }
             );
 

@@ -1,0 +1,107 @@
+@model List<ST10440112_PROG6212_CCMS.Models.Claim>
+
+@{
+    ViewData["Title"] = "Approved Claims for Payment";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-cash-coin"></i> Approved Claims for Payment</h2>
+            <p class="text-muted">View and process claims that are ready for payment</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Dashboard", "HR")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Count > 0)
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Summary</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Total Claims:</strong> @Model.Count
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Total Amount:</strong> R @Model.Sum(c => c.TotalHours * c.HourlyRate).ToString("N2")
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Average Claim:</strong> R @(Model.Count > 0 ? (Model.Sum(c => c.TotalHours * c.HourlyRate) / Model.Count).ToString("N2") : "0.00")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead style="background-color: #13325B; color: white;">
+                    <tr>
+                        <th>Lecturer</th>
+                        <th>Hours</th>
+                        <th>Hourly Rate</th>
+                        <th>Total Amount</th>
+                        <th>Approved Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@claim.Lecturer?.Name ?? "Unknown"</strong><br>
+                                <small class="text-muted">@claim.Lecturer?.Email</small>
+                            </td>
+                            <td>@claim.TotalHours.ToString("F1")</td>
+                            <td>R @claim.HourlyRate.ToString("N2")</td>
+                            <td>
+                                <span class="badge bg-success" style="font-size: 0.9rem;">
+                                    R @(claim.TotalHours * claim.HourlyRate).ToString("N2")
+                                </span>
+                            </td>
+                            <td>@claim.ApprovedDate?.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <form method="post" asp-action="MarkAsSettled" asp-route-id="@claim.ClaimId" style="display: inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Mark this claim as settled/paid?')">
+                                        <i class="bi bi-check-lg"></i> Mark Paid
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No approved claims pending payment at this time.
+        </div>
+    }
+</div>

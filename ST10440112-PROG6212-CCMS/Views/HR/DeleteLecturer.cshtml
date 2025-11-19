@@ -1,0 +1,44 @@
+@model ST10440112_PROG6212_CCMS.Models.Lecturer
+
+@{
+    ViewData["Title"] = "Delete Lecturer";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card border-danger shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title text-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Delete Lecturer
+                    </h4>
+                    <p class="card-text">Are you sure you want to delete this lecturer?</p>
+
+                    <div class="alert alert-light">
+                        <p><strong>Name:</strong> @Model.Name</p>
+                        <p><strong>Email:</strong> @Model.Email</p>
+                        <p><strong>Department:</strong> @Model.Department</p>
+                        <p class="mb-0"><strong>Hourly Rate:</strong> R @Model.HourlyRate.ToString("N2")</p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle"></i> This action cannot be undone.
+                    </div>
+
+                    <form asp-action="DeleteLecturer" method="post">
+                        <input type="hidden" asp-for="LecturerId" />
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Yes, Delete
+                            </button>
+                            <a href="@Url.Action("ManageLecturers", "HR")" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
