@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
 using ST10440112_PROG6212_CCMS.Models;
 using System.Security.Claims;
+using ClaimModel = ST10440112_PROG6212_CCMS.Models.Claim;
 
 namespace ST10440112_PROG6212_CCMS.Controllers
 {
@@ -92,7 +93,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 }
 
                 // Create a new claim with lecturer's hourly rate pre-filled
-                var claim = new Claim
+                var claim = new ClaimModel
                 {
                     LecturerId = lecturer.LecturerId,
                     HourlyRate = (int)lecturer.HourlyRate,
@@ -112,7 +113,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         // POST: Lecturer/SubmitClaim
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitClaim(Claim claim)
+        public async Task<IActionResult> SubmitClaim(ClaimModel claim)
         {
             try
             {
@@ -193,7 +194,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading claims");
-                return View(new List<Claim>());
+                return View(new List<ClaimModel>());
             }
         }
 
