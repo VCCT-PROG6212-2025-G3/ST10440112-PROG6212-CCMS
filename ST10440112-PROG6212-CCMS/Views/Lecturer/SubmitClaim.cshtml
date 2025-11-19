@@ -1,0 +1,121 @@
+@model ST10440112_PROG6212_CCMS.Models.Claim
+
+@{
+    ViewData["Title"] = "Submit Claim";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-file-earmark-plus"></i> Submit New Claim</h2>
+            <p class="text-muted">Enter your hours worked and submit for review</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Dashboard", "Lecturer")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="SubmitClaim" method="post" novalidate>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> <strong>Your Hourly Rate:</strong> R <strong>@Model.HourlyRate.ToString("N2")</strong>
+                            <br>
+                            <small>This rate is automatically applied to your claim calculation.</small>
+                        </div>
+
+                        <input type="hidden" asp-for="LecturerId" />
+                        <input type="hidden" asp-for="HourlyRate" />
+
+                        <div class="mb-3">
+                            <label asp-for="ClaimDate" class="form-label">Claim Date *</label>
+                            <input type="date" class="form-control"
+                                   asp-for="ClaimDate" required>
+                            <span class="text-danger small" asp-validation-for="ClaimDate"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TotalHours" class="form-label">Total Hours Worked *</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"
+                                       asp-for="TotalHours" step="0.5" min="0" max="160" placeholder="e.g., 20.5" required>
+                                <span class="input-group-text">hours</span>
+                            </div>
+                            <small class="text-muted">Range: 0 - 160 hours</small>
+                            <span class="text-danger small d-block" asp-validation-for="TotalHours"></span>
+                        </div>
+
+                        <div class="card mb-3" style="background-color: #f8f9fa;">
+                            <div class="card-body">
+                                <h6 class="card-title">Claim Summary</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Hourly Rate:</strong></p>
+                                        <p id="hourlyRateDisplay">R @Model.HourlyRate.ToString("N2")</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Total Amount:</strong></p>
+                                        <p id="totalAmountDisplay" style="font-size: 1.25rem; color: #13325B; font-weight: 600;">R 0.00</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Submit Claim
+                            </button>
+                            <a href="@Url.Action("Dashboard", "Lecturer")" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Tips</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <strong>Enter Your Hours:</strong> Input the total number of hours you worked during the claim period.
+                        </li>
+                        <li class="mb-2">
+                            <strong>Review Calculation:</strong> Your total amount will be calculated automatically.
+                        </li>
+                        <li class="mb-2">
+                            <strong>Submit for Review:</strong> Once submitted, your claim will be reviewed by the coordinator.
+                        </li>
+                        <li>
+                            <strong>Track Status:</strong> Check the status of your claims from your dashboard.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const hourlyRate = @Model.HourlyRate;
+        const totalHoursInput = document.querySelector('[name="TotalHours"]');
+
+        function updateCalculation() {
+            const hours = parseFloat(totalHoursInput.value) || 0;
+            const total = hours * hourlyRate;
+            document.getElementById('totalAmountDisplay').textContent = 'R ' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        totalHoursInput.addEventListener('input', updateCalculation);
+        updateCalculation();
+    });
+</script>

@@ -1,0 +1,85 @@
+@model List<ST10440112_PROG6212_CCMS.Models.Claim>
+
+@{
+    ViewData["Title"] = "My Claims";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-file-text"></i> My Claims</h2>
+            <p class="text-muted">View and track all your submitted claims</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("SubmitClaim", "Lecturer")" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Submit New Claim
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead style="background-color: #13325B; color: white;">
+                    <tr>
+                        <th>Claim Date</th>
+                        <th>Hours</th>
+                        <th>Hourly Rate</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model)
+                    {
+                        var statusBadgeClass = claim.ClaimStatus switch
+                        {
+                            "Pending" => "bg-warning",
+                            "Approved" => "bg-success",
+                            "Rejected" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td>@claim.ClaimDate.ToString("dd MMM yyyy")</td>
+                            <td>@claim.TotalHours.ToString("F1")</td>
+                            <td>R @claim.HourlyRate.ToString("N2")</td>
+                            <td>
+                                <span class="badge bg-info" style="font-size: 0.9rem;">
+                                    R @(claim.TotalHours * claim.HourlyRate).ToString("N2")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @statusBadgeClass">@claim.ClaimStatus</span>
+                            </td>
+                            <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <a href="@Url.Action("ClaimDetail", new { id = claim.ClaimId })" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> You haven't submitted any claims yet.
+            <a href="@Url.Action("SubmitClaim", "Lecturer")" class="alert-link">Submit your first claim</a>
+        </div>
+    }
+</div>

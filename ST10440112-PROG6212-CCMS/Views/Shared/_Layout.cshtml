@@ -196,26 +196,38 @@
                             </li>
                         </ul>
                     }
-                    else
+                    else if (User.IsInRole("Lecturer"))
                     {
                         <!-- Lecturer Navigation -->
                         <ul class="navbar-nav">
                             <li class="nav-item me-2">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index"
+                                <a class="nav-link" asp-area="" asp-controller="Lecturer" asp-action="Dashboard"
                                    style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
                                     <i class="bi bi-house-door"></i> Dashboard
                                 </a>
                             </li>
                             <li class="nav-item me-2">
-                                <a class="nav-link" asp-area="" asp-controller="Claims" asp-action="Create"
+                                <a class="nav-link" asp-area="" asp-controller="Lecturer" asp-action="SubmitClaim"
                                    style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
-                                    <i class="bi bi-file-earmark-plus"></i> File New Claim
+                                    <i class="bi bi-file-earmark-plus"></i> Submit Claim
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Claims" asp-action="Index"
+                                <a class="nav-link" asp-area="" asp-controller="Lecturer" asp-action="MyClaims"
                                    style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
-                                    <i class="bi bi-list-check"></i> Track Claims
+                                    <i class="bi bi-list-check"></i> My Claims
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <!-- Default Navigation (if no role matches) -->
+                        <ul class="navbar-nav">
+                            <li class="nav-item me-2">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index"
+                                   style="background-color: #9F7944; color: white; padding: 8px 20px; border-radius: 4px;">
+                                    <i class="bi bi-house-door"></i> Home
                                 </a>
                             </li>
                         </ul>

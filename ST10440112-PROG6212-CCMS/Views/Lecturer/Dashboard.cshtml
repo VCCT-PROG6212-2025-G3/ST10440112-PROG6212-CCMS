@@ -1,0 +1,101 @@
+@{
+    ViewData["Title"] = "Lecturer Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-speedometer2"></i> Lecturer Dashboard</h2>
+            <p class="text-muted">Submit and track your claims</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Total Claims Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Claims</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">@ViewBag.TotalClaims</h3>
+                        </div>
+                        <i class="bi bi-file-text" style="font-size: 2.5rem; color: #9F7944; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Claims Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Pending Claims</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">@ViewBag.PendingClaims</h3>
+                        </div>
+                        <i class="bi bi-clock-history" style="font-size: 2.5rem; color: #9F7944; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approved Claims Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Approved Claims</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">@ViewBag.ApprovedClaims</h3>
+                        </div>
+                        <i class="bi bi-check-circle" style="font-size: 2.5rem; color: #9F7944; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Earnings Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Earnings</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">R @ViewBag.TotalEarnings?.ToString("N2")</h3>
+                        </div>
+                        <i class="bi bi-cash-coin" style="font-size: 2.5rem; color: #9F7944; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hourly Rate Card -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm" style="border-left: 4px solid #13325B;">
+                <div class="card-body">
+                    <h5 class="card-title">Your Hourly Rate</h5>
+                    <p class="mb-2"><strong>Rate:</strong> <span style="font-size: 1.5rem; color: #13325B; font-weight: 600;">R @ViewBag.Lecturer?.HourlyRate.ToString("N2")</span></p>
+                    <p class="text-muted mb-0"><small>This rate is automatically applied to all your claim submissions</small></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm" style="border-left: 4px solid #9F7944;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-lightning-fill"></i> Quick Actions</h5>
+                    <a href="@Url.Action("SubmitClaim", "Lecturer")" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle"></i> Submit New Claim
+                    </a>
+                    <a href="@Url.Action("MyClaims", "Lecturer")" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-list-ul"></i> View My Claims
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
