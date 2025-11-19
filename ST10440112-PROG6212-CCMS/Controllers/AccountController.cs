@@ -38,20 +38,22 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-                if (result.Succeeded)
+                // Find user by email first
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null)
                 {
-                    var user = await _userManager.FindByEmailAsync(model.Email);
-                    if (user != null)
+                    // Try to sign in with the username
+                    var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+                    if (result.Succeeded)
                     {
                         HttpContext.Session.SetString("UserId", user.Id);
                         HttpContext.Session.SetString("UserEmail", user.Email ?? "");
                         HttpContext.Session.SetString("UserName", user.FullName ?? "");
                         HttpContext.Session.SetString("UserRole", user.Role ?? "");
-                    }
 
-                    return RedirectToLocal(returnUrl);
+                        return RedirectToLocal(returnUrl);
+                    }
                 }
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
