@@ -98,9 +98,9 @@
                         <div class="list-group">
                             @foreach (var doc in Model.Documents)
                             {
-                                <a href="@doc.DocumentPath" class="list-group-item list-group-item-action">
+                                <a href="@doc.Url" class="list-group-item list-group-item-action">
                                     <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1"><i class="bi bi-file"></i> @doc.DocumentName</h6>
+                                        <h6 class="mb-1"><i class="bi bi-file"></i> @doc.DocType</h6>
                                         <small>@doc.UploadDate.ToString("dd MMM yyyy")</small>
                                     </div>
                                 </a>
@@ -117,11 +117,12 @@
                         <h5 class="mb-0">Comments</h5>
                     </div>
                     <div class="card-body">
-                        @foreach (var comment in Model.Comments.OrderByDescending(c => c.CommentDate))
+                        @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedDate))
                         {
                             <div class="card mb-2">
                                 <div class="card-header" style="background-color: #f8f9fa;">
-                                    <small class="text-muted">@comment.CommentDate.ToString("dd MMM yyyy HH:mm")</small>
+                                    <strong>@comment.AuthorName</strong> <span class="badge bg-secondary">@comment.AuthorRole</span><br>
+                                    <small class="text-muted">@comment.CreatedDate.ToString("dd MMM yyyy HH:mm")</small>
                                 </div>
                                 <div class="card-body">
                                     <p class="mb-0">@comment.CommentText</p>
