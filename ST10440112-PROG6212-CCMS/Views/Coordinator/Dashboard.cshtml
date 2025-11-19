@@ -1,0 +1,124 @@
+@{
+    ViewData["Title"] = "Coordinator Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-speedometer2"></i> Programme Coordinator Dashboard</h2>
+            <p class="text-muted">Review and verify lecturer claims</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Pending Claims Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Pending Claims</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">@ViewBag.PendingClaims</h3>
+                        </div>
+                        <i class="bi bi-hourglass-split" style="font-size: 2.5rem; color: #ffc107; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verified Claims Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Verified Claims</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">@ViewBag.VerifiedClaims</h3>
+                        </div>
+                        <i class="bi bi-check-circle" style="font-size: 2.5rem; color: #28a745; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rejected Claims Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Rejected Claims</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">@ViewBag.RejectedClaims</h3>
+                        </div>
+                        <i class="bi bi-x-circle" style="font-size: 2.5rem; color: #dc3545; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Value Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 shadow-sm border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Value</h6>
+                            <h3 class="card-text" style="color: #13325B; font-weight: 600;">R @ViewBag.TotalClaimsValue?.ToString("N0")</h3>
+                        </div>
+                        <i class="bi bi-cash-coin" style="font-size: 2.5rem; color: #9F7944; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-lightning-fill"></i> Quick Actions</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <a href="@Url.Action("VerifyClaims", "Coordinator")" class="btn btn-primary w-100">
+                                <i class="bi bi-file-earmark-check"></i> Review Pending Claims
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="@Url.Action("VerifiedClaims", "Coordinator")" class="btn btn-success w-100">
+                                <i class="bi bi-check-lg"></i> View Verified Claims
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <form method="post" asp-action="AutoVerifyAll" style="display: inline;">
+                                <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Auto-verify all pending claims?')">
+                                    <i class="bi bi-lightning"></i> Auto-Verify All
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Rules Info -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Automatic Verification Rules</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><strong>✓ Hours Range:</strong> Claims must have between 0.5 and 160 hours</li>
+                        <li class="mb-2"><strong>✓ Hourly Rate:</strong> Rate must be between R 100 and R 10,000</li>
+                        <li class="mb-2"><strong>✓ Lecturer Validation:</strong> Lecturer must exist in the system</li>
+                        <li class="mb-2"><strong>✓ Claim Date:</strong> Cannot be in the future</li>
+                        <li><strong>✓ Submission Timeline:</strong> Claim must be submitted within 30 days of claim date</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
