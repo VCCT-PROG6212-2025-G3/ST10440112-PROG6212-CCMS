@@ -48,7 +48,7 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title" style="font-weight: 600; color: #000;">Total Amount Claimed</h5>
-                    <h2 class="mb-2" style="font-weight: bold; color: #28a745; font-size: 2.5rem;">R@(ViewBag.TotalAmount.ToString("N0"))</h2>
+                    <h2 class="mb-2" style="font-weight: bold; color: #28a745; font-size: 2.5rem;">R@((ViewBag.TotalAmount ?? 0).ToString("N0"))</h2>
                     <p class="mb-0 text-muted">Rand Value of all claims</p>
                 </div>
             </div>
