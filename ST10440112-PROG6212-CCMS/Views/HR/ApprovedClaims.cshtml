@@ -85,6 +85,9 @@
                             </td>
                             <td>@claim.ApprovedDate?.ToString("dd MMM yyyy")</td>
                             <td>
+                                <a href="@Url.Action("GenerateInvoice", "HR", new { id = claim.ClaimId })" class="btn btn-sm btn-info" title="Generate invoice">
+                                    <i class="bi bi-file-earmark-pdf"></i> Invoice
+                                </a>
                                 <form method="post" asp-action="MarkAsSettled" asp-route-id="@claim.ClaimId" style="display: inline;">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Mark this claim as settled/paid?')">

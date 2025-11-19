@@ -1,0 +1,144 @@
+@model ST10440112_PROG6212_CCMS.Models.Claim
+
+@{
+    ViewData["Title"] = "Generate Invoice";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-file-earmark-pdf"></i> Generate Invoice</h2>
+            <p class="text-muted">Create an invoice for an approved claim</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("ApprovedClaims", "HR")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Invoice Preview -->
+            <div class="card shadow-sm border-primary">
+                <div class="card-header" style="background-color: #13325B; color: white;">
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i> Invoice Preview</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Invoice Content -->
+                    <div style="background-color: #f8f9fa; padding: 30px; border-radius: 8px;">
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #13325B; padding-bottom: 20px;">
+                            <h3 style="color: #13325B; margin: 0;">NEWLANDS UNIVERSITY</h3>
+                            <p style="color: #9F7944; margin: 5px 0; font-weight: bold;">Claims Management System</p>
+                            <p style="color: #666; margin: 5px 0; font-size: 0.9rem;">INVOICE</p>
+                        </div>
+
+                        <!-- Invoice Details -->
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col-md-6">
+                                <p style="margin: 5px 0;"><strong>Invoice Date:</strong> @DateTime.Now.ToString("dd MMM yyyy")</p>
+                                <p style="margin: 5px 0;"><strong>Claim ID:</strong> @Model.ClaimId.ToString("N").Substring(0, 8).ToUpper()</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p style="margin: 5px 0;"><strong>Status:</strong> <span class="badge bg-success">@Model.ClaimStatus</span></p>
+                                <p style="margin: 5px 0;"><strong>Payment Status:</strong> <span class="badge bg-warning">@(Model.IsSettled ? "Settled" : "Pending")</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Lecturer Information -->
+                        <div style="margin-bottom: 20px; padding: 15px; background-color: white; border-left: 4px solid #9F7944; border-radius: 4px;">
+                            <h6 style="color: #13325B; margin-bottom: 10px;"><i class="bi bi-person"></i> Lecturer Information</h6>
+                            <p style="margin: 5px 0;"><strong>Name:</strong> @Model.Lecturer?.Name ?? "Unknown"</p>
+                            <p style="margin: 5px 0;"><strong>Email:</strong> @Model.Lecturer?.Email</p>
+                        </div>
+
+                        <!-- Claim Details -->
+                        <div style="margin-bottom: 20px; padding: 15px; background-color: white; border-left: 4px solid #13325B; border-radius: 4px;">
+                            <h6 style="color: #13325B; margin-bottom: 10px;"><i class="bi bi-calendar-event"></i> Claim Details</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p style="margin: 5px 0;"><strong>Claim Date:</strong></p>
+                                    <p style="margin: 5px 0; color: #666;">@Model.ClaimDate.ToString("dd MMM yyyy")</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p style="margin: 5px 0;"><strong>Submission Date:</strong></p>
+                                    <p style="margin: 5px 0; color: #666;">@Model.SubmissionDate.ToString("dd MMM yyyy")</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p style="margin: 5px 0;"><strong>Approved Date:</strong></p>
+                                    <p style="margin: 5px 0; color: #666;">@Model.ApprovedDate?.ToString("dd MMM yyyy")</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Calculation -->
+                        <div style="margin-bottom: 20px; padding: 15px; background-color: white; border-radius: 4px; border: 2px solid #17a2b8;">
+                            <h6 style="color: #13325B; margin-bottom: 15px;"><i class="bi bi-calculator"></i> Payment Calculation</h6>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 8px 0;"><strong>Hours Worked:</strong></td>
+                                    <td style="padding: 8px 0; text-align: right;">@Model.TotalHours.ToString("F1") hours</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 8px 0;"><strong>Hourly Rate:</strong></td>
+                                    <td style="padding: 8px 0; text-align: right;">R @Model.HourlyRate.ToString("N2")</td>
+                                </tr>
+                                <tr style="border-bottom: 2px solid #13325B; background-color: #f0f0f0;">
+                                    <td style="padding: 12px 0;"><strong style="font-size: 1.1rem;">TOTAL AMOUNT DUE:</strong></td>
+                                    <td style="padding: 12px 0; text-align: right; color: #13325B;"><strong style="font-size: 1.1rem;">R @(Model.TotalHours * Model.HourlyRate).ToString("N2")</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="text-align: center; padding-top: 20px; border-top: 1px solid #dee2e6; color: #666; font-size: 0.9rem;">
+                            <p>This invoice has been automatically generated by the Claims Management System</p>
+                            <p style="color: #999; font-size: 0.85rem;">Invoice ID: @Model.ClaimId.ToString("N").Substring(0, 12).ToUpper()</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="bi bi-download"></i> Export Invoice</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <a href="@Url.Action("ExportInvoicePDF", "HR", new { id = Model.ClaimId })" class="btn btn-primary w-100">
+                                        <i class="bi bi-file-csv"></i> Download as CSV
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <button onclick="window.print();" class="btn btn-info w-100">
+                                        <i class="bi bi-printer"></i> Print Invoice
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .btn, .card-header {
+            display: none !important;
+        }
+
+        body {
+            background-color: white;
+        }
+
+        .card {
+            border: none;
+            box-shadow: none;
+        }
+    }
+</style>
