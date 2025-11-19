@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
 using ST10440112_PROG6212_CCMS.Models;
 using System.Security.Claims;
+using ClaimModel = ST10440112_PROG6212_CCMS.Models.Claim;
 
 namespace ST10440112_PROG6212_CCMS.Controllers
 {
@@ -74,7 +76,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error loading claims: {ex.Message}";
-                return View(new List<Claim>());
+                return View(new List<ClaimModel>());
             }
         }
 
@@ -170,7 +172,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error loading claims: {ex.Message}";
-                return View(new List<Claim>());
+                return View(new List<ClaimModel>());
             }
         }
     }
