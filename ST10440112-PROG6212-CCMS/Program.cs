@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
+using ST10440112_PROG6212_CCMS.Filters;
 using ST10440112_PROG6212_CCMS.Models;
 using ST10440112_PROG6212_CCMS.Services;
 
@@ -13,7 +14,11 @@ namespace ST10440112_PROG6212_CCMS
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews(options =>
+            {
+                // Add the role-based access filter globally
+                options.Filters.Add<RoleBasedAccessFilter>();
+            });
 
             // Add db Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -32,6 +37,9 @@ namespace ST10440112_PROG6212_CCMS
 
             // Register File Upload Service
             builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
+            // Register Session Management Service
+            builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
 
             // Add session support
             builder.Services.AddSession(options =>

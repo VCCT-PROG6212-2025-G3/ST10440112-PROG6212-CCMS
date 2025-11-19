@@ -16,6 +16,8 @@ namespace ST10440112_PROG6212_CCMS.Data
         public DbSet<ClaimComment> ClaimComments { get; set; }
         public DbSet<ProgrammeCoordinator> ProgrammeCoordinators { get; set; }
         public DbSet<AcademicManager> AcademicManagers { get; set; }
+        public DbSet<UserSession> UserSessions { get; set; }
+        public DbSet<UserActivity> UserActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

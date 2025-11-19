@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ST10440112_PROG6212_CCMS.Models;
+using ST10440112_PROG6212_CCMS.Services;
 using System.ComponentModel.DataAnnotations;
 
 namespace ST10440112_PROG6212_CCMS.Controllers
@@ -9,11 +10,16 @@ namespace ST10440112_PROG6212_CCMS.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly ISessionManagementService _sessionManagementService;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
+            ISessionManagementService sessionManagementService, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _sessionManagementService = sessionManagementService;
+            _logger = logger;
         }
 
         // GET: /Account/Login
@@ -55,12 +61,31 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                         };
                         await _userManager.AddClaimsAsync(user, claims);
 
+                        // Create session in database
+                        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                        var userSession = await _sessionManagementService.CreateSessionAsync(
+                            user.Id, user.Email ?? "", user.Role ?? "", ipAddress);
+
+                        // Log activity
+                        await _sessionManagementService.LogActivityAsync(
+                            user.Id, user.Email ?? "", user.Role ?? "", "Login",
+                            "Account", "Login", ipAddress, true, $"User logged in successfully");
+
                         HttpContext.Session.SetString("UserId", user.Id);
                         HttpContext.Session.SetString("UserEmail", user.Email ?? "");
                         HttpContext.Session.SetString("UserName", user.FullName ?? "");
                         HttpContext.Session.SetString("UserRole", user.Role ?? "");
+                        HttpContext.Session.SetString("SessionId", userSession.SessionId.ToString());
 
                         return RedirectToLocal(returnUrl);
+                    }
+                    else
+                    {
+                        // Log failed login attempt
+                        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                        await _sessionManagementService.LogActivityAsync(
+                            user.Id, user.Email ?? "", user.Role ?? "", "Login",
+                            "Account", "Login", ipAddress, false, "Failed login attempt");
                     }
                 }
 
@@ -75,6 +100,34 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            try
+            {
+                // Get session ID from session
+                if (HttpContext.Session.TryGetValue("SessionId", out var sessionIdBytes))
+                {
+                    var sessionIdStr = System.Text.Encoding.UTF8.GetString(sessionIdBytes);
+                    if (Guid.TryParse(sessionIdStr, out var sessionId))
+                    {
+                        // End session in database
+                        await _sessionManagementService.EndSessionAsync(sessionId);
+
+                        // Log activity
+                        var userId = HttpContext.Session.GetString("UserId") ?? "";
+                        var email = HttpContext.Session.GetString("UserEmail") ?? "";
+                        var role = HttpContext.Session.GetString("UserRole") ?? "";
+                        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+                        await _sessionManagementService.LogActivityAsync(
+                            userId, email, role, "Logout",
+                            "Account", "Logout", ipAddress, true, "User logged out");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during logout");
+            }
+
             await _signInManager.SignOutAsync();
             HttpContext.Session.Clear();
             return RedirectToAction(nameof(HomeController.Index), "Home");
