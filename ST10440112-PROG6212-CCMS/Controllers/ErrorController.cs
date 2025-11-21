@@ -117,6 +117,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         /// Test route to manually trigger an exception for testing error handling
         /// </summary>
         [Route("Error/Test")]
+        [AllowAnonymous]
         public IActionResult TestError()
         {
             throw new Exception("This is a test exception to demonstrate error handling and the custom error page.");
