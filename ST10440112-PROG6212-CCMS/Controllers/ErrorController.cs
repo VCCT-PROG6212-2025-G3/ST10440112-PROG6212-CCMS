@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using ST10440112_PROG6212_CCMS.Models;
 using System.Diagnostics;
 
 namespace ST10440112_PROG6212_CCMS.Controllers
@@ -123,11 +124,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         {
             var errorViewModel = new ErrorViewModel
             {
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                Message = "This is a test exception to demonstrate error handling and the custom error page.",
-                ShowDetails = IsDevelopment(),
-                ExceptionType = "System.Exception",
-                StackTrace = IsDevelopment() ? "Test exception for demonstration purposes" : null
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
             };
 
             return View("Error", errorViewModel);
@@ -141,18 +138,5 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             return environment == "Development";
         }
-    }
-
-    /// <summary>
-    /// Error view model
-    /// </summary>
-    public class ErrorViewModel
-    {
-        public string? RequestId { get; set; }
-        public string Message { get; set; } = "An error occurred";
-        public bool ShowDetails { get; set; }
-        public string? ExceptionType { get; set; }
-        public string? StackTrace { get; set; }
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
     }
 }
