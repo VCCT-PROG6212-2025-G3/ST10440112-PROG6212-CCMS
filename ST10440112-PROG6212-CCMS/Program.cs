@@ -38,6 +38,9 @@ namespace ST10440112_PROG6212_CCMS
             // Register File Upload Service
             builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
+            // Register File Encryption Service
+            builder.Services.AddScoped<IFileEncryptionService, FileEncryptionService>();
+
             // Register Session Management Service
             builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
 
