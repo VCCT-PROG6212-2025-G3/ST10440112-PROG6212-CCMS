@@ -17,7 +17,7 @@ namespace ST10440112_PROG6212_CCMS.Models
         public decimal HourlyRate { get; set; }
 
         [Required(ErrorMessage = "Total hours is required")]
-        [Range(0.01, 24, ErrorMessage = "Total hours must be between 0.01 and 24 hours per day")]
+        [Range(0.01, 160, ErrorMessage = "Total hours must be between 0.01 and 160 hours")]
         public float TotalHours { get; set; }
 
         [Required(ErrorMessage = "Claim date is required")]

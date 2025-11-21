@@ -96,7 +96,7 @@
 
                             <div class="text-end me-2">
                                 <div style="font-size: 0.95rem; font-weight: 500; color: #333; line-height: 1.2;">
-                                    @User.FindFirst("FullName")?.Value ?? User.Identity.Name
+                                    @User.FindFirst("FullName")?.Value
                                 </div>
                                 <div style="font-size: 0.8rem; color: #6c757d; line-height: 1.2;">
                                     @(User.IsInRole("Lecturer") ? "Lecturer" :
