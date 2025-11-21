@@ -57,13 +57,21 @@ namespace ST10440112_PROG6212_CCMS
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
+            // Configure the HTTP request pipeline with enhanced error handling
+            if (app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                // Development: Show detailed error pages
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                // Production: Use custom error handler
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
+
+            // Handle specific status codes (404, 403, 500)
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

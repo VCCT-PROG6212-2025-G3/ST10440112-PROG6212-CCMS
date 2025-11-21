@@ -245,18 +245,30 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddDocuments(Guid claimId, List<IFormFile> documents)
         {
+            // Circuit breaker: Check if we've been here before (prevent infinite loops)
+            var errorCount = HttpContext.Session.GetInt32($"ErrorCount_{claimId}") ?? 0;
+            if (errorCount >= 3)
+            {
+                _logger.LogWarning($"Circuit breaker triggered for claim {claimId}. Too many errors.");
+                HttpContext.Session.Remove($"ErrorCount_{claimId}");
+                TempData["ErrorMessage"] = "Multiple errors occurred. Please contact support if the problem persists.";
+                return RedirectToAction("Index", "Home");
+            }
+
             try
             {
                 if (documents == null || !documents.Any())
                 {
                     TempData["ErrorMessage"] = "Please select at least one document to upload.";
-                    return RedirectToAction(nameof(AddDocuments), new { id = claimId });
+                    return RedirectToAction(nameof(Details), new { id = claimId });
                 }
 
                 var claim = await _context.Claims.FindAsync(claimId);
                 if (claim == null)
                 {
-                    return NotFound();
+                    _logger.LogWarning($"Claim {claimId} not found during document upload");
+                    TempData["ErrorMessage"] = "Claim not found.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Only allow adding documents if claim is still pending
@@ -267,41 +279,90 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 }
 
                 int uploadedCount = 0;
+                int failedCount = 0;
+                List<string> errors = new List<string>();
+
                 foreach (var file in documents)
                 {
-                    var uploadResult = await _fileUploadService.UploadFileAsync(file, claimId.ToString());
-
-                    if (uploadResult.Success)
+                    try
                     {
-                        var document = new Document
+                        var uploadResult = await _fileUploadService.UploadFileAsync(file, claimId.ToString());
+
+                        if (uploadResult.Success)
                         {
-                            DocumentID = Guid.NewGuid(),
-                            ClaimId = claimId,
-                            Url = uploadResult.FilePath!,
-                            UploadDate = DateTime.Now,
-                            DocType = _fileUploadService.GetFileExtension(file.FileName)
-                        };
+                            var document = new Document
+                            {
+                                DocumentID = Guid.NewGuid(),
+                                ClaimId = claimId,
+                                Url = uploadResult.FilePath!,
+                                UploadDate = DateTime.Now,
+                                DocType = _fileUploadService.GetFileExtension(file.FileName)
+                            };
 
-                        _context.Documents.Add(document);
-                        uploadedCount++;
+                            _context.Documents.Add(document);
+                            uploadedCount++;
+                        }
+                        else
+                        {
+                            failedCount++;
+                            errors.Add($"{file.FileName}: {uploadResult.Message}");
+                            _logger.LogWarning($"Failed to upload file {file.FileName}: {uploadResult.Message}");
+                        }
                     }
-                    else
+                    catch (Exception fileEx)
                     {
-                        _logger.LogWarning($"Failed to upload file: {uploadResult.Message}");
-                        TempData["ErrorMessage"] = uploadResult.Message;
+                        failedCount++;
+                        errors.Add($"{file.FileName}: Upload failed");
+                        _logger.LogError(fileEx, $"Exception uploading file {file.FileName}");
                     }
                 }
 
-                await _context.SaveChangesAsync();
+                // Save successful uploads
+                if (uploadedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Successfully uploaded {uploadedCount} documents for claim {claimId}");
+                }
 
-                TempData["SuccessMessage"] = $"{uploadedCount} document(s) uploaded successfully!";
+                // Reset error counter on success
+                HttpContext.Session.Remove($"ErrorCount_{claimId}");
+
+                // Provide detailed feedback
+                if (uploadedCount > 0 && failedCount == 0)
+                {
+                    TempData["SuccessMessage"] = $"{uploadedCount} document(s) uploaded successfully!";
+                }
+                else if (uploadedCount > 0 && failedCount > 0)
+                {
+                    TempData["WarningMessage"] = $"{uploadedCount} document(s) uploaded successfully, but {failedCount} failed. Errors: {string.Join("; ", errors)}";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"All uploads failed. Errors: {string.Join("; ", errors)}";
+                }
+
+                return RedirectToAction(nameof(Details), new { id = claimId });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, $"Database error adding documents to claim {claimId}");
+                HttpContext.Session.SetInt32($"ErrorCount_{claimId}", errorCount + 1);
+                TempData["ErrorMessage"] = "Database error occurred. Please try again or contact support.";
                 return RedirectToAction(nameof(Details), new { id = claimId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding documents to claim");
-                TempData["ErrorMessage"] = "An error occurred while uploading documents. Please try again.";
-                return RedirectToAction(nameof(AddDocuments), new { id = claimId });
+                _logger.LogError(ex, $"Unexpected error adding documents to claim {claimId}");
+                HttpContext.Session.SetInt32($"ErrorCount_{claimId}", errorCount + 1);
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again.";
+                
+                // After multiple errors, redirect to safe page instead of looping
+                if (errorCount >= 2)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                
+                return RedirectToAction(nameof(Details), new { id = claimId });
             }
         }
     }

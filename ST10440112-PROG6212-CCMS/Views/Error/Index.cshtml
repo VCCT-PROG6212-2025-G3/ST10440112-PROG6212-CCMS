@@ -1,0 +1,79 @@
+@model ST10440112_PROG6212_CCMS.Controllers.ErrorViewModel
+
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill"></i> An Error Occurred
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h5 class="alert-heading">@Model.Message</h5>
+                        <p class="mb-0">We apologize for the inconvenience. The error has been logged and our team will investigate.</p>
+                    </div>
+
+                    @if (Model.ShowDetails && !string.IsNullOrEmpty(Model.ExceptionType))
+                    {
+                        <div class="mt-4">
+                            <h6>Technical Details (Development Mode Only):</h6>
+                            <div class="alert alert-warning">
+                                <p><strong>Exception Type:</strong> @Model.ExceptionType</p>
+                                @if (Model.ShowRequestId)
+                                {
+                                    <p><strong>Request ID:</strong> <code>@Model.RequestId</code></p>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.StackTrace))
+                                {
+                                    <details>
+                                        <summary><strong>Stack Trace</strong></summary>
+                                        <pre class="mt-2" style="font-size: 0.85rem; max-height: 400px; overflow-y: auto;">@Model.StackTrace</pre>
+                                    </details>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mt-4">
+                        <h6>What can you do?</h6>
+                        <ul>
+                            <li>Try refreshing the page</li>
+                            <li>Go back to the <a href="@Url.Action("Index", "Home")">home page</a></li>
+                            <li>If the problem persists, contact support with Request ID: <code>@Model.RequestId</code></li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                            <i class="bi bi-house-door"></i> Go to Home
+                        </a>
+                        <button onclick="history.back()" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    details summary {
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    details summary:hover {
+        text-decoration: underline;
+    }
+</style>
