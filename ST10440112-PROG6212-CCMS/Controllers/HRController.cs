@@ -488,12 +488,12 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 var claimList = await claims.OrderByDescending(c => c.ApprovedDate).ToListAsync();
 
-                // Generate PDF content using HTML
-                var pdfContent = GenerateReportPDF(claimList);
-                var bytes = Encoding.UTF8.GetBytes(pdfContent);
+                // Generate HTML content for PDF export
+                var htmlContent = GenerateReportPDF(claimList);
+                var bytes = Encoding.UTF8.GetBytes(htmlContent);
 
-                var fileName = $"Claims_Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-                return File(bytes, "application/pdf", fileName);
+                var fileName = $"Claims_Report_{DateTime.Now:yyyyMMdd_HHmmss}.html";
+                return File(bytes, "text/html", fileName);
             }
             catch (Exception ex)
             {

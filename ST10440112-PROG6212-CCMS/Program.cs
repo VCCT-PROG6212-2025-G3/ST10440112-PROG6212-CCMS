@@ -77,6 +77,22 @@ namespace ST10440112_PROG6212_CCMS
             app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.UseHttpsRedirection();
+
+            // Block direct access to encrypted files in uploads folder - must go through DocumentController
+            app.Use(async (context, next) =>
+            {
+                var path = context.Request.Path.Value?.ToLower() ?? "";
+                // Block direct access to document files in uploads folder
+                if (path.StartsWith("/uploads/") && (path.EndsWith(".pdf") || path.EndsWith(".docx") ||
+                    path.EndsWith(".doc") || path.EndsWith(".xlsx") || path.EndsWith(".xls")))
+                {
+                    context.Response.StatusCode = StatusCodes.Status404NotFound;
+                    await context.Response.CompleteAsync();
+                    return;
+                }
+                await next();
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
