@@ -453,7 +453,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                     return NotFound();
                 }
 
-                // Generate CSV content for PDF representation
+                // Generate CSV content for invoice
                 var csvContent = GenerateInvoiceCSV(claim);
                 var bytes = Encoding.UTF8.GetBytes(csvContent);
 
@@ -465,6 +465,41 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 _logger.LogError(ex, "Error exporting invoice");
                 TempData["ErrorMessage"] = "Error exporting invoice";
                 return RedirectToAction(nameof(ApprovedClaims));
+            }
+        }
+
+        // GET: HR/ExportReportPDF
+        public async Task<IActionResult> ExportReportPDF(string reportType = "all", DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                var claims = _context.Claims
+                    .Include(c => c.Lecturer)
+                    .Where(c => c.ClaimStatus == "Approved");
+
+                if (startDate.HasValue)
+                {
+                    claims = claims.Where(c => c.ClaimDate >= startDate.Value);
+                }
+                if (endDate.HasValue)
+                {
+                    claims = claims.Where(c => c.ClaimDate <= endDate.Value);
+                }
+
+                var claimList = await claims.OrderByDescending(c => c.ApprovedDate).ToListAsync();
+
+                // Generate PDF content using HTML
+                var pdfContent = GenerateReportPDF(claimList);
+                var bytes = Encoding.UTF8.GetBytes(pdfContent);
+
+                var fileName = $"Claims_Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                return File(bytes, "application/pdf", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting report as PDF");
+                TempData["ErrorMessage"] = "Error exporting report";
+                return RedirectToAction(nameof(GenerateReport));
             }
         }
 
@@ -590,6 +625,90 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             csv.AppendLine($"Payment Status:,{(claim.IsSettled ? settledText : pendingText)}");
 
             return csv.ToString();
+        }
+
+        // Helper method to generate report in PDF HTML format
+        private string GenerateReportPDF(List<Claim> claims)
+        {
+            var totalAmount = claims.Sum(c => (decimal)c.TotalHours * c.HourlyRate);
+            var totalHours = claims.Sum(c => c.TotalHours);
+
+            var html = new StringBuilder();
+            html.AppendLine("<!DOCTYPE html>");
+            html.AppendLine("<html>");
+            html.AppendLine("<head>");
+            html.AppendLine("<meta charset=\"utf-8\">");
+            html.AppendLine("<title>Claims Report</title>");
+            html.AppendLine("<style>");
+            html.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; }");
+            html.AppendLine("h1 { color: #13325B; text-align: center; }");
+            html.AppendLine("h2 { color: #13325B; margin-top: 20px; }");
+            html.AppendLine("table { width: 100%; border-collapse: collapse; margin-top: 10px; }");
+            html.AppendLine("th { background-color: #13325B; color: white; padding: 8px; text-align: left; }");
+            html.AppendLine("td { border: 1px solid #ddd; padding: 8px; }");
+            html.AppendLine("tr:nth-child(even) { background-color: #f9f9f9; }");
+            html.AppendLine(".summary { margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-left: 4px solid #13325B; }");
+            html.AppendLine(".summary p { margin: 5px 0; }");
+            html.AppendLine("</style>");
+            html.AppendLine("</head>");
+            html.AppendLine("<body>");
+
+            html.AppendLine("<h1>Newlands University - Claims Report</h1>");
+            html.AppendLine($"<p style=\"text-align: center; color: #666;\">Generated: {DateTime.Now:dd MMM yyyy HH:mm}</p>");
+
+            html.AppendLine("<h2>Report Summary</h2>");
+            html.AppendLine("<div class=\"summary\">");
+            html.AppendLine($"<p><strong>Total Claims:</strong> {claims.Count}</p>");
+            html.AppendLine($"<p><strong>Total Hours:</strong> {totalHours:F1}</p>");
+            html.AppendLine($"<p><strong>Total Amount:</strong> R {totalAmount:N2}</p>");
+            html.AppendLine($"<p><strong>Average per Claim:</strong> R {(claims.Count > 0 ? (totalAmount / claims.Count) : 0):N2}</p>");
+            html.AppendLine("</div>");
+
+            html.AppendLine("<h2>Claim Details</h2>");
+            html.AppendLine("<table>");
+            html.AppendLine("<thead>");
+            html.AppendLine("<tr>");
+            html.AppendLine("<th>Lecturer</th>");
+            html.AppendLine("<th>Email</th>");
+            html.AppendLine("<th>Claim Date</th>");
+            html.AppendLine("<th>Hours</th>");
+            html.AppendLine("<th>Hourly Rate</th>");
+            html.AppendLine("<th>Total Amount</th>");
+            html.AppendLine("<th>Approved Date</th>");
+            html.AppendLine("<th>Payment Status</th>");
+            html.AppendLine("</tr>");
+            html.AppendLine("</thead>");
+            html.AppendLine("<tbody>");
+
+            foreach (var claim in claims)
+            {
+                var claimTotal = (decimal)claim.TotalHours * claim.HourlyRate;
+                var paymentStatus = claim.IsSettled ? "Settled" : "Pending";
+                html.AppendLine("<tr>");
+                html.AppendLine($"<td>{(claim.Lecturer?.Name ?? "Unknown")}</td>");
+                html.AppendLine($"<td>{claim.Lecturer?.Email}</td>");
+                html.AppendLine($"<td>{claim.ClaimDate:dd MMM yyyy}</td>");
+                html.AppendLine($"<td>{claim.TotalHours:F1}</td>");
+                html.AppendLine($"<td>R {claim.HourlyRate:N2}</td>");
+                html.AppendLine($"<td>R {claimTotal:N2}</td>");
+                html.AppendLine($"<td>{claim.ApprovedDate:dd MMM yyyy}</td>");
+                html.AppendLine($"<td>{paymentStatus}</td>");
+                html.AppendLine("</tr>");
+            }
+
+            html.AppendLine("</tbody>");
+            html.AppendLine("</table>");
+
+            html.AppendLine("<div class=\"summary\" style=\"margin-top: 20px;\">");
+            html.AppendLine($"<p><strong>Total Claims:</strong> {claims.Count}</p>");
+            html.AppendLine($"<p><strong>Total Hours:</strong> {totalHours:F1}</p>");
+            html.AppendLine($"<p><strong>Total Amount:</strong> R {totalAmount:N2}</p>");
+            html.AppendLine("</div>");
+
+            html.AppendLine("</body>");
+            html.AppendLine("</html>");
+
+            return html.ToString();
         }
 
         // GET: HR/BulkImport

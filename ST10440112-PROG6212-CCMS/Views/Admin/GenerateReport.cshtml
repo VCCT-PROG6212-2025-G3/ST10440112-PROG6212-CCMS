@@ -11,7 +11,7 @@
             <p class="text-muted">Create detailed reports of approved claims</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="@Url.Action("Dashboard", "HR")" class="btn btn-secondary">
+            <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
@@ -146,12 +146,12 @@
                         <h6 class="card-title"><i class="bi bi-download"></i> Export Report</h6>
                         <div class="row">
                             <div class="col-md-4 mb-2">
-                                <a href="@Url.Action("ExportReportCSV", "HR", new { reportType = ViewBag.ReportType, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })" class="btn btn-primary w-100">
+                                <a href="@Url.Action("ExportReportCSV", "Admin", new { reportType = ViewBag.ReportType, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })" class="btn btn-primary w-100">
                                     <i class="bi bi-file-csv"></i> Download as CSV
                                 </a>
                             </div>
                             <div class="col-md-4 mb-2">
-                                <a href="@Url.Action("ExportReportPDF", "HR", new { reportType = ViewBag.ReportType, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })" class="btn btn-danger w-100">
+                                <a href="@Url.Action("ExportReportPDF", "Admin", new { reportType = ViewBag.ReportType, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })" class="btn btn-danger w-100">
                                     <i class="bi bi-file-pdf"></i> Download as PDF
                                 </a>
                             </div>

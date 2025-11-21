@@ -7,9 +7,14 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Approve Claims</h2>
-        <a asp-action="Dashboard" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
+        <div>
+            <a asp-action="GenerateReport" class="btn btn-primary me-2">
+                <i class="bi bi-graph-up"></i> Generate Report
+            </a>
+            <a asp-action="Dashboard" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
