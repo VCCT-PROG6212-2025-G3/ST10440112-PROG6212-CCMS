@@ -47,6 +47,9 @@ namespace ST10440112_PROG6212_CCMS
             // Register Claim Validation Service
             builder.Services.AddScoped<IClaimValidationService, ClaimValidationService>();
 
+            // Register Login Redirect Helper
+            builder.Services.AddScoped<ILoginRedirectHelper, LoginRedirectHelper>();
+
             // Add session support
             builder.Services.AddSession(options =>
             {

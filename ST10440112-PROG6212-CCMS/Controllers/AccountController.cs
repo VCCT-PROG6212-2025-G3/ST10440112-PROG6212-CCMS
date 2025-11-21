@@ -11,14 +11,16 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ISessionManagementService _sessionManagementService;
+        private readonly ILoginRedirectHelper _redirectHelper;
         private readonly ILogger<AccountController> _logger;
 
         public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-            ISessionManagementService sessionManagementService, ILogger<AccountController> logger)
+            ISessionManagementService sessionManagementService, ILoginRedirectHelper redirectHelper, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _sessionManagementService = sessionManagementService;
+            _redirectHelper = redirectHelper;
             _logger = logger;
         }
 
@@ -147,7 +149,11 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 return Redirect(returnUrl);
             }
 
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            // Get user role from session or claims
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var dashboardRoute = _redirectHelper.GetDashboardRoute(userRole);
+
+            return RedirectToAction(dashboardRoute.Action, dashboardRoute.Controller);
         }
     }
 
