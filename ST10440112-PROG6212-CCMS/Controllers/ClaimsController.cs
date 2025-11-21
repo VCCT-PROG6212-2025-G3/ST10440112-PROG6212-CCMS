@@ -60,6 +60,12 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             {
                 if (!ModelState.IsValid)
                 {
+                    // Log validation errors for debugging
+                    var errors = ModelState.Values.SelectMany(v => v.Errors);
+                    foreach (var error in errors)
+                    {
+                        _logger.LogWarning($"Validation Error: {error.ErrorMessage}");
+                    }
                     return View(model);
                 }
 

@@ -37,14 +37,14 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="TotalHours" class="form-label"><strong>Total Hours</strong></label>
-                        <input asp-for="TotalHours" class="form-control" type="number" step="0.5" min="0.5" max="200" readonly style="background-color: #f8f9fa; font-weight: bold;" />
+                        <input asp-for="TotalHours" class="form-control" type="number" step="0.5" min="0.5" max="200" style="background-color: #f8f9fa; font-weight: bold;" />
                         <span asp-validation-for="TotalHours" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label asp-for="HourlyRate" class="form-label"><strong>Hourly Rate (ZAR)</strong></label>
                         <div class="input-group">
                             <span class="input-group-text">R</span>
-                            <input asp-for="HourlyRate" class="form-control" type="number" readonly style="background-color: #e9ecef;" />
+                            <input asp-for="HourlyRate" class="form-control" type="number" style="background-color: #e9ecef;" />
                         </div>
                         <small class="form-text text-muted">Your approved hourly rate</small>
                     </div>
