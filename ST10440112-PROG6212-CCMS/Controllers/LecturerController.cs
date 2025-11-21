@@ -39,8 +39,11 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 if (lecturer == null)
                 {
+                    _logger.LogWarning($"Dashboard: No lecturer found for email {lecturerEmail}");
                     return NotFound("Lecturer profile not found");
                 }
+
+                _logger.LogInformation($"Dashboard: Lecturer ID = {lecturer.LecturerId}, Email = {lecturer.Email}");
 
                 var totalClaims = await _context.Claims
                     .Where(c => c.LecturerId == lecturer.LecturerId)
@@ -181,19 +184,25 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 if (lecturer == null)
                 {
+                    _logger.LogWarning($"MyClaims: No lecturer found for email {lecturerEmail}");
                     return NotFound("Lecturer profile not found");
                 }
+
+                _logger.LogInformation($"MyClaims: Searching for claims with LecturerId = {lecturer.LecturerId}");
 
                 var claims = await _context.Claims
                     .Where(c => c.LecturerId == lecturer.LecturerId)
                     .OrderByDescending(c => c.SubmissionDate)
                     .ToListAsync();
 
+                _logger.LogInformation($"MyClaims: Found {claims.Count} claims for lecturer {lecturer.Name}");
+
                 return View(claims);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading claims");
+                _logger.LogError(ex, "Error loading claims: {ErrorMessage}", ex.Message);
+                TempData["ErrorMessage"] = $"Error loading claims: {ex.Message}";
                 return View(new List<ClaimModel>());
             }
         }
