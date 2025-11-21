@@ -93,7 +93,16 @@ namespace ST10440112_PROG6212_CCMS
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                context.Database.Migrate();
+                try
+                {
+                    context.Database.Migrate();
+                }
+                catch
+                {
+                    // If migration fails (e.g., due to schema conflicts), recreate the database
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
+                }
             }
 
             // Seed roles and users
