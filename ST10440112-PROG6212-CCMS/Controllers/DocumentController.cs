@@ -45,15 +45,14 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 // Authorization check - user must be:
                 // 1. The lecturer who submitted the claim, OR
-                // 2. An admin (ProgrammeCoordinator or AcademicManager)
+                // 2. An admin (ProgrammeCoordinator, AcademicManager, or HR)
                 var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
                 var lecturer = await _context.Lecturers
                     .FirstOrDefaultAsync(l => l.Email == userEmail);
 
                 var isOwner = lecturer != null && document.Claim.LecturerId == lecturer.LecturerId;
-                var isAdmin = userRole == "ProgrammeCoordinator" || userRole == "AcademicManager";
+                var isAdmin = User.IsInRole("ProgrammeCoordinator") || User.IsInRole("AcademicManager") || User.IsInRole("HR");
 
                 if (!isOwner && !isAdmin)
                 {
@@ -110,13 +109,12 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 // Authorization check - same as download
                 var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
                 var lecturer = await _context.Lecturers
                     .FirstOrDefaultAsync(l => l.Email == userEmail);
 
                 var isOwner = lecturer != null && document.Claim.LecturerId == lecturer.LecturerId;
-                var isAdmin = userRole == "ProgrammeCoordinator" || userRole == "AcademicManager";
+                var isAdmin = User.IsInRole("ProgrammeCoordinator") || User.IsInRole("AcademicManager") || User.IsInRole("HR");
 
                 if (!isOwner && !isAdmin)
                 {

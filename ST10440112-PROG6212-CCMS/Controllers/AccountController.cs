@@ -55,13 +55,28 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                     if (result.Succeeded)
                     {
-                        // Add claims to the user
-                        var claims = new List<System.Security.Claims.Claim>
+                        // Get existing claims to avoid duplicates
+                        var existingClaims = await _userManager.GetClaimsAsync(user);
+                        var claimsToAdd = new List<System.Security.Claims.Claim>();
+
+                        // Only add claims that don't exist
+                        if (!existingClaims.Any(c => c.Type == "FullName"))
                         {
-                            new System.Security.Claims.Claim("FullName", user.FullName ?? user.UserName ?? ""),
-                            new System.Security.Claims.Claim("Email", user.Email ?? "")
-                        };
-                        await _userManager.AddClaimsAsync(user, claims);
+                            claimsToAdd.Add(new System.Security.Claims.Claim("FullName", user.FullName ?? user.UserName ?? ""));
+                        }
+                        if (!existingClaims.Any(c => c.Type == "Email"))
+                        {
+                            claimsToAdd.Add(new System.Security.Claims.Claim("Email", user.Email ?? ""));
+                        }
+                        if (!existingClaims.Any(c => c.Type == System.Security.Claims.ClaimTypes.Role))
+                        {
+                            claimsToAdd.Add(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.Role ?? ""));
+                        }
+
+                        if (claimsToAdd.Count > 0)
+                        {
+                            await _userManager.AddClaimsAsync(user, claimsToAdd);
+                        }
 
                         // Create session in database
                         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";

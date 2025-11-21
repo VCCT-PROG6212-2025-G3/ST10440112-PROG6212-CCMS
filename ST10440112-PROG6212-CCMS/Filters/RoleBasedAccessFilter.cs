@@ -38,10 +38,10 @@ namespace ST10440112_PROG6212_CCMS.Filters
             // Define role-to-controller mappings
             var allowedRoutes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
             {
-                { "Lecturer", new List<string> { "home", "lecturer", "claim" } },
-                { "ProgrammeCoordinator", new List<string> { "home", "coordinator", "claim", "lecturer" } },
-                { "AcademicManager", new List<string> { "home", "manager", "claim", "lecturer" } },
-                { "HR", new List<string> { "home", "hr", "lecturer" } }
+                { "Lecturer", new List<string> { "home", "lecturer", "claim", "document" } },
+                { "ProgrammeCoordinator", new List<string> { "home", "coordinator", "claim", "lecturer", "admin", "document" } },
+                { "AcademicManager", new List<string> { "home", "manager", "claim", "lecturer", "admin", "document" } },
+                { "HR", new List<string> { "home", "hr", "lecturer", "document" } }
             };
 
             // Check if user's role has access to this controller
