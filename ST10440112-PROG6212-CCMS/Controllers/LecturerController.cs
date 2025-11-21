@@ -227,6 +227,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 _logger.LogInformation($"MyClaims: Searching for claims with LecturerId = {lecturer.LecturerId}");
 
                 var claims = await _context.Claims
+                    .Include(c => c.Documents)
                     .Where(c => c.LecturerId == lecturer.LecturerId)
                     .OrderByDescending(c => c.SubmissionDate)
                     .ToListAsync();

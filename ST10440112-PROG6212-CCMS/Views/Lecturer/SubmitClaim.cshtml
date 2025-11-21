@@ -21,7 +21,7 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <form asp-action="SubmitClaim" method="post" novalidate>
+                    <form asp-action="SubmitClaim" method="post" novalidate enctype="multipart/form-data">
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i> <strong>Your Hourly Rate:</strong> R <strong>@Model.HourlyRate.ToString("N2")</strong>
                             <br>
