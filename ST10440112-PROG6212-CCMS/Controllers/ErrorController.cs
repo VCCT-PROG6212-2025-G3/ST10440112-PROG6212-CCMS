@@ -124,7 +124,11 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         {
             var errorViewModel = new ErrorViewModel
             {
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                Message = "This is a test exception to demonstrate error handling and the custom error page.",
+                ShowDetails = IsDevelopment(),
+                ExceptionType = "System.Exception",
+                StackTrace = IsDevelopment() ? "Test exception for demonstration purposes" : null
             };
 
             return View("Error", errorViewModel);
