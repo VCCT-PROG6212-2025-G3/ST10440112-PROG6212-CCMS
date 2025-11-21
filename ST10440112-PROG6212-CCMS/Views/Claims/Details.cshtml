@@ -131,10 +131,7 @@
                                             Uploaded: @doc.UploadDate.ToString("dd MMM yyyy") | Type: @doc.DocType
                                         </small>
                                     </div>
-                                    <div class="btn-group" role="group">
-                                        <a asp-controller="Document" asp-action="View" asp-route-documentId="@doc.DocumentID" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                            <i class="bi bi-eye"></i> View
-                                        </a>
+                                    <div>
                                         <a asp-controller="Document" asp-action="Download" asp-route-documentId="@doc.DocumentID" class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-download"></i> Download
                                         </a>
