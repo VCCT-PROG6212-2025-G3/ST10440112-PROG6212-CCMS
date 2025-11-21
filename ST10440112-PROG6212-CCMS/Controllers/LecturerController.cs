@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
 using ST10440112_PROG6212_CCMS.Models;
+using ST10440112_PROG6212_CCMS.Services;
 using System.Security.Claims;
 using ClaimModel = ST10440112_PROG6212_CCMS.Models.Claim;
 
@@ -15,12 +16,14 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<LecturerController> _logger;
+        private readonly IFileUploadService _fileUploadService;
 
-        public LecturerController(ApplicationDbContext context, UserManager<AppUser> userManager, ILogger<LecturerController> logger)
+        public LecturerController(ApplicationDbContext context, UserManager<AppUser> userManager, ILogger<LecturerController> logger, IFileUploadService fileUploadService)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _fileUploadService = fileUploadService;
         }
 
         // GET: Lecturer/Dashboard
@@ -116,7 +119,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         // POST: Lecturer/SubmitClaim
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitClaim(ClaimModel claim)
+        public async Task<IActionResult> SubmitClaim(ClaimModel claim, List<IFormFile>? documents)
         {
             try
             {
@@ -151,6 +154,39 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 {
                     _context.Add(claim);
                     await _context.SaveChangesAsync();
+
+                    // Handle file uploads
+                    if (documents != null && documents.Any())
+                    {
+                        foreach (var file in documents)
+                        {
+                            if (file.Length > 0)
+                            {
+                                var uploadResult = await _fileUploadService.UploadFileAsync(file, claim.ClaimId.ToString());
+
+                                if (uploadResult.Success)
+                                {
+                                    var document = new Document
+                                    {
+                                        DocumentID = Guid.NewGuid(),
+                                        ClaimId = claim.ClaimId,
+                                        Url = uploadResult.FilePath!,
+                                        UploadDate = DateTime.Now,
+                                        DocType = _fileUploadService.GetFileExtension(file.FileName)
+                                    };
+
+                                    _context.Documents.Add(document);
+                                }
+                                else
+                                {
+                                    _logger.LogWarning($"Failed to upload file: {uploadResult.Message}");
+                                    TempData["WarningMessage"] = $"Claim submitted but file upload failed: {uploadResult.Message}";
+                                }
+                            }
+                        }
+
+                        await _context.SaveChangesAsync();
+                    }
 
                     TempData["SuccessMessage"] = $"Claim submitted successfully! You will earn R {((decimal)claim.TotalHours * claim.HourlyRate):N2}";
                     return RedirectToAction(nameof(MyClaims));
