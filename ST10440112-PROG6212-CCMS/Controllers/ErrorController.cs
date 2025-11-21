@@ -131,7 +131,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 StackTrace = IsDevelopment() ? "Test exception for demonstration purposes" : null
             };
 
-            return View("Error", errorViewModel);
+            return View("Index", errorViewModel);
         }
 
         /// <summary>
