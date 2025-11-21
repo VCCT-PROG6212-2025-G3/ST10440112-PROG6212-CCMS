@@ -45,10 +45,10 @@
                                 <strong>Total Claims:</strong> @Model.Count
                             </div>
                             <div class="col-md-4">
-                                <strong>Total Amount:</strong> R @Model.Sum(c => c.TotalHours * c.HourlyRate).ToString("N2")
+                                <strong>Total Amount:</strong> R @Model.Sum(c => (decimal)c.TotalHours * c.HourlyRate).ToString("N2")
                             </div>
                             <div class="col-md-4">
-                                <strong>Average Claim:</strong> R @(Model.Count > 0 ? (Model.Sum(c => c.TotalHours * c.HourlyRate) / Model.Count).ToString("N2") : "0.00")
+                                <strong>Average Claim:</strong> R @(Model.Count > 0 ? (Model.Sum(c => (decimal)c.TotalHours * c.HourlyRate) / Model.Count).ToString("N2") : "0.00")
                             </div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                             <td>R @claim.HourlyRate.ToString("N2")</td>
                             <td>
                                 <span class="badge bg-success" style="font-size: 0.9rem;">
-                                    R @(claim.TotalHours * claim.HourlyRate).ToString("N2")
+                                    R @((decimal)claim.TotalHours * claim.HourlyRate).ToString("N2")
                                 </span>
                             </td>
                             <td>@claim.ApprovedDate?.ToString("dd MMM yyyy")</td>

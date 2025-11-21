@@ -31,7 +31,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers.Admin
                 var rejectedClaims = await _context.Claims.CountAsync(c => c.ClaimStatus == "Rejected");
                 var totalAmount = await _context.Claims
                     .Where(c => c.ClaimStatus == "Approved")
-                    .SumAsync(c => c.TotalHours * c.HourlyRate);
+                    .SumAsync(c => (decimal)c.TotalHours * c.HourlyRate);
 
                 ViewBag.TotalClaims = totalClaims;
                 ViewBag.PendingClaims = pendingClaims;

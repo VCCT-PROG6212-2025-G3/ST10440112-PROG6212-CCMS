@@ -24,17 +24,18 @@ namespace ST10440112_PROG6212_CCMS.Attributes
                 return new ValidationResult("Hourly rate is required.");
             }
 
-            if (value is int rate)
-            {
-                if (rate < _minRate || rate > _maxRate)
-                {
-                    return new ValidationResult(ErrorMessage);
-                }
+            decimal rate = 0;
+            if (value is int i) rate = i;
+            else if (value is decimal d) rate = d;
+            else if (value is double db) rate = (decimal)db;
+            else return new ValidationResult("Invalid rate format.");
 
-                return ValidationResult.Success;
+            if (rate < _minRate || rate > _maxRate)
+            {
+                return new ValidationResult(ErrorMessage);
             }
 
-            return new ValidationResult("Invalid rate format.");
+            return ValidationResult.Success;
         }
     }
 }

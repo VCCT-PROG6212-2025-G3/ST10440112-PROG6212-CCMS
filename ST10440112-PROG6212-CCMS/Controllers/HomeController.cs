@@ -12,22 +12,27 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly ApplicationDbContext _context;
+    private readonly Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
 
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
     {
         _logger = logger;
         _context = context;
+        _userManager = userManager;
     }
 
     public async Task<IActionResult> Index()
     {
         try
         {
-            // Get the first lecturer (simulating logged-in user)
-            var lecturer = await _context.Lecturers.FirstOrDefaultAsync();
+            // Get the current user and their lecturer profile
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var lecturer = await _context.Lecturers.FirstOrDefaultAsync(l => l.Email == user.Email);
             if (lecturer == null)
             {
-                return View();
+                return View(new List<Claim>());
             }
 
             // Get lecturer's claims statistics
@@ -37,7 +42,7 @@ public class HomeController : Controller
             var rejectedClaims = await _context.Claims.CountAsync(c => c.LecturerId == lecturer.LecturerId && c.ClaimStatus == "Rejected");
             var totalAmount = await _context.Claims
                 .Where(c => c.LecturerId == lecturer.LecturerId)
-                .SumAsync(c => c.TotalHours * c.HourlyRate);
+                .SumAsync(c => (decimal)c.TotalHours * c.HourlyRate);
 
             ViewBag.TotalClaims = totalClaims;
             ViewBag.ApprovedClaims = approvedClaims;

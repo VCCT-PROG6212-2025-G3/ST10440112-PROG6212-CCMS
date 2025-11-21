@@ -128,7 +128,7 @@
                                 <td>@claim.TotalHours.ToString("F1")</td>
                                 <td>R @claim.HourlyRate.ToString("N2")</td>
                                 <td>
-                                    <span class="badge bg-info">R @(claim.TotalHours * claim.HourlyRate).ToString("N2")</span>
+                                    <span class="badge bg-info">R @(((decimal)claim.TotalHours * claim.HourlyRate).ToString("N2"))</span>
                                 </td>
                                 <td>@claim.ApprovedDate?.ToString("dd MMM yyyy")</td>
                                 <td>

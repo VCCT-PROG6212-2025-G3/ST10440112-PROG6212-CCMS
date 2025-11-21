@@ -114,7 +114,7 @@
                                         }
                                     </td>
                                     <td>@claim.TotalHours</td>
-                                    <td><strong>R@((claim.TotalHours * claim.HourlyRate).ToString("N0"))</strong></td>
+                                    <td><span class="badge bg-info">R @(((decimal)claim.TotalHours * claim.HourlyRate).ToString("N2"))</span></td>
                                     <td>@claim.SubmissionDate.ToString("dd-MM-yyyy")</td>
                                     <td>
                                         <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-sm btn-link p-0 me-2" style="color: #9F7944; text-decoration: none;" title="View Details">

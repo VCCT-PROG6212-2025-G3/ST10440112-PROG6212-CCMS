@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
@@ -13,22 +14,40 @@ namespace ST10440112_PROG6212_CCMS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IFileUploadService _fileUploadService;
+        private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<ClaimsController> _logger;
 
         public ClaimsController(
             ApplicationDbContext context,
             IFileUploadService fileUploadService,
+            UserManager<AppUser> userManager,
             ILogger<ClaimsController> logger)
         {
             _context = context;
             _fileUploadService = fileUploadService;
+            _userManager = userManager;
             _logger = logger;
         }
 
         // GET: Claims/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var model = new ClaimSubmissionViewModel();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var lecturer = await _context.Lecturers.FirstOrDefaultAsync(l => l.Email == user.Email);
+            if (lecturer == null)
+            {
+                TempData["ErrorMessage"] = "Lecturer profile not found. Please contact HR.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var model = new ClaimSubmissionViewModel
+            {
+                HourlyRate = lecturer.HourlyRate
+            };
+            
+            ViewBag.LecturerName = lecturer.Name;
             return View(model);
         }
 
@@ -44,11 +63,28 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                     return View(model);
                 }
 
-                // Get the first lecturer from database (In a real app, this would come from authentication)
-                var lecturer = await _context.Lecturers.FirstOrDefaultAsync();
+                // Get the current user and their lecturer profile
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Challenge();
+
+                var lecturer = await _context.Lecturers.FirstOrDefaultAsync(l => l.Email == user.Email);
                 if (lecturer == null)
                 {
-                    ModelState.AddModelError("", "No lecturer found in the system. Please ensure seed data is loaded.");
+                    ModelState.AddModelError("", "Lecturer profile not found.");
+                    return View(model);
+                }
+
+                // Validation: Max hours per month
+                // Check total hours claimed in current month
+                var currentMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                var currentMonthClaims = await _context.Claims
+                    .Where(c => c.LecturerId == lecturer.LecturerId && c.ClaimDate >= currentMonthStart)
+                    .SumAsync(c => c.TotalHours);
+
+                if (currentMonthClaims + model.TotalHours > 180)
+                {
+                    ModelState.AddModelError("TotalHours", $"Total hours for this month cannot exceed 180. You have already claimed {currentMonthClaims} hours.");
+                    model.HourlyRate = lecturer.HourlyRate; // Ensure rate is preserved
                     return View(model);
                 }
 
@@ -57,7 +93,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 {
                     ClaimId = Guid.NewGuid(),
                     LecturerId = lecturer.LecturerId,
-                    HourlyRate = model.HourlyRate,
+                    HourlyRate = lecturer.HourlyRate, // Use rate from profile, not model input
                     TotalHours = model.TotalHours,
                     ClaimDate = DateTime.Now,
                     SubmissionDate = DateTime.Now,
@@ -114,8 +150,11 @@ namespace ST10440112_PROG6212_CCMS.Controllers
         {
             try
             {
-                // Get the first lecturer (In a real app, this would come from authentication)
-                var lecturer = await _context.Lecturers.FirstOrDefaultAsync();
+                // Get the current user and their lecturer profile
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Challenge();
+
+                var lecturer = await _context.Lecturers.FirstOrDefaultAsync(l => l.Email == user.Email);
                 if (lecturer == null)
                 {
                     return View(new List<Claim>());

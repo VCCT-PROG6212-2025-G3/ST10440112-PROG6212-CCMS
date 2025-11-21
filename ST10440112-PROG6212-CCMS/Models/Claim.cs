@@ -13,8 +13,8 @@ namespace ST10440112_PROG6212_CCMS.Models
         public string ClaimStatus { get; set; } = "Pending";
 
         [Required(ErrorMessage = "Hourly rate is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "Hourly rate must be a positive number")]
-        public int HourlyRate { get; set; }
+        [Range(1, 10000, ErrorMessage = "Hourly rate must be between 1 and 10000")]
+        public decimal HourlyRate { get; set; }
 
         [Required(ErrorMessage = "Total hours is required")]
         [Range(0.01, 24, ErrorMessage = "Total hours must be between 0.01 and 24 hours per day")]

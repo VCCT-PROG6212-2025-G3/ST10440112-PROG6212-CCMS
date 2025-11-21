@@ -51,7 +51,7 @@
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <h6 class="text-muted">Total Amount</h6>
-                            <p><strong style="font-size: 1.75rem; color: #13325B;">R @(Model.TotalHours * Model.HourlyRate).ToString("N2")</strong></p>
+                            <p class="h3 text-success">R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))</p>
                         </div>
                     </div>
 
@@ -157,7 +157,7 @@
                         </li>
                         <li class="mb-2">
                             <strong>Total Amount:</strong><br>
-                            <span style="font-size: 1.1rem; color: #13325B; font-weight: 600;">R @(Model.TotalHours * Model.HourlyRate).ToString("N2")</span>
+                            <span style="font-size: 1.1rem; color: #13325B; font-weight: 600;">R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))</span>
                         </li>
                         <li>
                             <strong>Payment Status:</strong><br>

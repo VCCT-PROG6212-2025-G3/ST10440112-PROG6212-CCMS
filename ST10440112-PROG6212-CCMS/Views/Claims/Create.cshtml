@@ -41,13 +41,12 @@
                         <span asp-validation-for="TotalHours" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label asp-for="HourlyRate" class="form-label"></label>
+                        <label asp-for="HourlyRate" class="form-label"><strong>Hourly Rate (ZAR)</strong></label>
                         <div class="input-group">
                             <span class="input-group-text">R</span>
-                            <input asp-for="HourlyRate" class="form-control" type="number" min="100" max="1000" />
+                            <input asp-for="HourlyRate" class="form-control" type="number" readonly style="background-color: #e9ecef;" />
                         </div>
-                        <span asp-validation-for="HourlyRate" class="text-danger"></span>
-                        <small class="form-text text-muted">Must be between R100 and R1000</small>
+                        <small class="form-text text-muted">Your approved hourly rate</small>
                     </div>
                 </div>
 
@@ -124,7 +123,7 @@
         }
 
         // Update calculations on input change
-        $('.hours-input, #HourlyRate').on('input', calculateTotals);
+        $('.hours-input').on('input', calculateTotals);
 
         // Character count for additional notes
         $('#AdditionalNotes').on('input', function() {
@@ -190,9 +189,9 @@
                 return false;
             }
             
-            if (rate < 100 || rate > 1000) {
+            if (totalHours < 0.5 || totalHours > 200) {
                 e.preventDefault();
-                alert('Hourly rate must be between R100 and R1000.');
+                alert('Total hours must be between 0.5 and 200.');
                 return false;
             }
             

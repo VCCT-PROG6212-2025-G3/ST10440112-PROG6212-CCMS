@@ -86,7 +86,7 @@
                                 </tr>
                                 <tr style="border-bottom: 2px solid #13325B; background-color: #f0f0f0;">
                                     <td style="padding: 12px 0;"><strong style="font-size: 1.1rem;">TOTAL AMOUNT DUE:</strong></td>
-                                    <td style="padding: 12px 0; text-align: right; color: #13325B;"><strong style="font-size: 1.1rem;">R @(Model.TotalHours * Model.HourlyRate).ToString("N2")</strong></td>
+                                    <td style="padding: 12px 0; text-align: right; color: #13325B;"><strong style="font-size: 1.1rem;">R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))</strong></td>
                                 </tr>
                             </table>
                         </div>

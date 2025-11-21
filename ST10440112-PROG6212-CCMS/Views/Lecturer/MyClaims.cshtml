@@ -57,7 +57,7 @@
                             <td>R @claim.HourlyRate.ToString("N2")</td>
                             <td>
                                 <span class="badge bg-info" style="font-size: 0.9rem;">
-                                    R @(claim.TotalHours * claim.HourlyRate).ToString("N2")
+                                    R @(((decimal)claim.TotalHours * claim.HourlyRate).ToString("N2"))
                                 </span>
                             </td>
                             <td>

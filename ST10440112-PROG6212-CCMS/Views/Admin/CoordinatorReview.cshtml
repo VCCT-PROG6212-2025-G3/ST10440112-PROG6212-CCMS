@@ -115,7 +115,7 @@
                                         <span class="badge" style="background-color: #fff3cd; color: #856404;">Pending</span>
                                     </td>
                                     <td>@claim.TotalHours hrs</td>
-                                    <td><strong>R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))</strong></td>
+                                    <td><span class="badge bg-info">R @(((decimal)claim.TotalHours * claim.HourlyRate).ToString("N2"))</span></td>
                                     <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
                                     <td>
                                         <div class="btn-group" role="group">

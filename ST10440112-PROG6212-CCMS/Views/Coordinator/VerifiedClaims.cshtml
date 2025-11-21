@@ -32,7 +32,7 @@
                                 <strong>Total Hours:</strong> @Model.Sum(c => c.TotalHours).ToString("F1")
                             </div>
                             <div class="col-md-4">
-                                <strong>Total Value:</strong> R @Model.Sum(c => c.TotalHours * c.HourlyRate).ToString("N2")
+                                <strong>Total Value:</strong> R @Model.Sum(c => (decimal)c.TotalHours * c.HourlyRate).ToString("N2")
                             </div>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                             <td>R @claim.HourlyRate.ToString("N2")</td>
                             <td>
                                 <span class="badge bg-info" style="font-size: 0.9rem;">
-                                    R @(claim.TotalHours * claim.HourlyRate).ToString("N2")
+                                    R @((decimal)claim.TotalHours * claim.HourlyRate).ToString("N2")
                                 </span>
                             </td>
                             <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>

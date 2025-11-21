@@ -335,7 +335,7 @@
             </div>
             <div style="margin-top: 30px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
                 <div class="info-label">TOTAL CLAIM AMOUNT</div>
-                <div class="amount-highlight">R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))</div>
+                <div class="amount-highlight">R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))</div>
             </div>
         </div>
     </div>

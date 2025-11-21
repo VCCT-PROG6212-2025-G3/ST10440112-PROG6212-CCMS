@@ -98,7 +98,7 @@
                         </div>
                         <div class="col-md-4">
                             <strong>Total Amount:</strong>
-                            <h4 class="text-success">R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))</h4>
+                            <p class="h3 text-success">R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))</p>
                         </div>
                     </div>
 
@@ -269,7 +269,7 @@
                         </li>
                         <li>
                             <i class="bi bi-cash text-success"></i>
-                            <strong>Amount:</strong> R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))
+                            <strong>Amount:</strong> R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))
                         </li>
                     </ul>
                 </div>
@@ -298,7 +298,7 @@
                             <strong>Summary:</strong><br />
                             Lecturer: @Model.Lecturer?.Name<br />
                             Hours: @Model.TotalHours<br />
-                            Amount: R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))
+                            Amount: R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Comments (Optional)</label>
@@ -335,7 +335,7 @@
                             <strong>Summary:</strong><br />
                             Lecturer: @Model.Lecturer?.Name<br />
                             Hours: @Model.TotalHours<br />
-                            Amount: R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))<br />
+                            Amount: R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))<br />
                             Status: Verified by Coordinator
                         </div>
                         <div class="mb-3">
@@ -373,7 +373,7 @@
                             <strong>Summary:</strong><br />
                             Lecturer: @Model.Lecturer?.Name<br />
                             Hours: @Model.TotalHours<br />
-                            Amount: R @((Model.TotalHours * Model.HourlyRate).ToString("N2"))
+                            Amount: R @(((decimal)Model.TotalHours * Model.HourlyRate).ToString("N2"))
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>

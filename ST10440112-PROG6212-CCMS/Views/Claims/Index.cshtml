@@ -68,7 +68,7 @@
                                         }
                                     </td>
                                     <td>@claim.TotalHours hrs</td>
-                                    <td>R @((claim.TotalHours * claim.HourlyRate).ToString("N2"))</td>
+                                    <td>R @(((decimal)claim.TotalHours * claim.HourlyRate).ToString("N2"))</td>
                                     <td>@claim.SubmissionDate.ToString("dd MMM yyyy")</td>
                                     <td>
                                         @if (claim.Documents != null && claim.Documents.Any())

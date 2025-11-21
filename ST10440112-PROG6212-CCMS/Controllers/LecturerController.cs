@@ -56,7 +56,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 var totalEarnings = await _context.Claims
                     .Where(c => c.LecturerId == lecturer.LecturerId && (c.ClaimStatus == "Approved" || c.IsSettled))
-                    .SumAsync(c => c.TotalHours * c.HourlyRate);
+                    .SumAsync(c => (decimal)c.TotalHours * c.HourlyRate);
 
                 ViewBag.Lecturer = lecturer;
                 ViewBag.TotalClaims = totalClaims;
@@ -149,7 +149,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                     _context.Add(claim);
                     await _context.SaveChangesAsync();
 
-                    TempData["SuccessMessage"] = $"Claim submitted successfully! You will earn R {(claim.TotalHours * claim.HourlyRate):N2}";
+                    TempData["SuccessMessage"] = $"Claim submitted successfully! You will earn R {((decimal)claim.TotalHours * claim.HourlyRate):N2}";
                     return RedirectToAction(nameof(MyClaims));
                 }
 

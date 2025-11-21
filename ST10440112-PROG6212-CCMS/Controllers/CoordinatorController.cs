@@ -45,7 +45,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 var totalClaimsValue = await _context.Claims
                     .Where(c => c.ClaimStatus == "Verified" || c.ClaimStatus == "Approved")
-                    .SumAsync(c => c.TotalHours * c.HourlyRate);
+                    .SumAsync(c => (decimal)c.TotalHours * c.HourlyRate);
 
                 ViewBag.PendingClaims = pendingClaims;
                 ViewBag.VerifiedClaims = verifiedClaims;

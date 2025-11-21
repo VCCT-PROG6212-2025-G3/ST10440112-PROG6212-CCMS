@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ST10440112_PROG6212_CCMS.Data;
@@ -11,11 +12,13 @@ namespace ST10440112_PROG6212_CCMS.Controllers
     public class HRController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<HRController> _logger;
 
-        public HRController(ApplicationDbContext context, ILogger<HRController> logger)
+        public HRController(ApplicationDbContext context, UserManager<AppUser> userManager, ILogger<HRController> logger)
         {
             _context = context;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -28,7 +31,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 var totalApprovedClaims = await _context.Claims.CountAsync(c => c.ClaimStatus == "Approved");
                 var totalPaymentAmount = await _context.Claims
                     .Where(c => c.ClaimStatus == "Approved" && !c.IsSettled)
-                    .SumAsync(c => c.TotalHours * c.HourlyRate);
+                    .SumAsync(c => (decimal)c.TotalHours * c.HourlyRate);
 
                 ViewBag.TotalLecturers = totalLecturers;
                 ViewBag.TotalApprovedClaims = totalApprovedClaims;
@@ -63,6 +66,65 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 _logger.LogError(ex, "Error loading lecturers");
                 return View(new List<Lecturer>());
             }
+        }
+
+        // GET: HR/CreateLecturer
+        public IActionResult CreateLecturer()
+        {
+            return View();
+        }
+
+        // POST: HR/CreateLecturer
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateLecturer(Lecturer lecturer)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Check if email already exists
+                    if (await _context.Lecturers.AnyAsync(l => l.Email == lecturer.Email))
+                    {
+                        ModelState.AddModelError("Email", "A lecturer with this email already exists.");
+                        return View(lecturer);
+                    }
+
+                    lecturer.LecturerId = Guid.NewGuid();
+                    _context.Add(lecturer);
+                    await _context.SaveChangesAsync();
+
+                    // Create AppUser login
+                    var user = new AppUser
+                    {
+                        UserName = lecturer.Email,
+                        Email = lecturer.Email,
+                        FullName = lecturer.Name,
+                        Role = "Lecturer",
+                        LecturerId = lecturer.LecturerId,
+                        EmailConfirmed = true
+                    };
+
+                    var result = await _userManager.CreateAsync(user, "Password123!"); // Default password
+                    if (result.Succeeded)
+                    {
+                        await _userManager.AddToRoleAsync(user, "Lecturer");
+                        TempData["SuccessMessage"] = $"Lecturer '{lecturer.Name}' added successfully with default password 'Password123!'";
+                    }
+                    else
+                    {
+                        TempData["WarningMessage"] = $"Lecturer added but login creation failed: {string.Join(", ", result.Errors.Select(e => e.Description))}";
+                    }
+
+                    return RedirectToAction(nameof(ManageLecturers));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating lecturer");
+                    ModelState.AddModelError(string.Empty, "An error occurred while creating the lecturer.");
+                }
+            }
+            return View(lecturer);
         }
 
         // GET: HR/EditLecturer/{id}
@@ -293,7 +355,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 ViewBag.StartDate = startDate;
                 ViewBag.EndDate = endDate;
                 ViewBag.TotalClaims = claimList.Count;
-                ViewBag.TotalAmount = claimList.Sum(c => c.TotalHours * c.HourlyRate);
+                ViewBag.TotalAmount = claimList.Sum(c => (decimal)c.TotalHours * c.HourlyRate);
                 ViewBag.TotalHours = claimList.Sum(c => c.TotalHours);
 
                 return View(claimList);
@@ -335,7 +397,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
 
                 foreach (var claim in claimList)
                 {
-                    var totalAmount = claim.TotalHours * claim.HourlyRate;
+                    var totalAmount = (decimal)claim.TotalHours * claim.HourlyRate;
                     var lecturerName = claim.Lecturer?.Name ?? "Unknown";
                     var lecturerEmail = claim.Lecturer?.Email ?? "";
                     csv.AppendLine($"{lecturerName},{lecturerEmail},{claim.ClaimDate:dd/MM/yyyy},{claim.TotalHours:F1},R {claim.HourlyRate:N2},R {totalAmount:N2},{claim.ApprovedDate:dd/MM/yyyy},{claim.ClaimStatus}");
@@ -344,7 +406,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 csv.AppendLine();
                 csv.AppendLine($"Total Claims,{claimList.Count}");
                 csv.AppendLine($"Total Hours,{claimList.Sum(c => c.TotalHours):F1}");
-                csv.AppendLine($"Total Amount,R {claimList.Sum(c => c.TotalHours * c.HourlyRate):N2}");
+                csv.AppendLine($"Total Amount,R {claimList.Sum(c => (decimal)c.TotalHours * c.HourlyRate):N2}");
 
                 var bytes = Encoding.UTF8.GetBytes(csv.ToString());
                 var fileName = $"Claims_Report_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
@@ -384,7 +446,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             csv.AppendLine("PAYMENT CALCULATION");
             csv.AppendLine($"Hours Worked:,{claim.TotalHours:F1}");
             csv.AppendLine($"Hourly Rate:,R {claim.HourlyRate:N2}");
-            csv.AppendLine($"Total Amount Due:,R {(claim.TotalHours * claim.HourlyRate):N2}");
+            csv.AppendLine($"Total Amount Due:,R {((decimal)claim.TotalHours * claim.HourlyRate):N2}");
             csv.AppendLine();
             csv.AppendLine($"Status:,{claim.ClaimStatus}");
             csv.AppendLine($"Payment Status:,{(claim.IsSettled ? settledText : pendingText)}");
@@ -503,6 +565,29 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                                 HourlyRate = hourlyRate
                             };
                             _context.Lecturers.Add(lecturer);
+                            
+                            // Create AppUser for new lecturer
+                            var user = new AppUser
+                            {
+                                UserName = lecturer.Email,
+                                Email = lecturer.Email,
+                                FullName = lecturer.Name,
+                                Role = "Lecturer",
+                                LecturerId = lecturer.LecturerId,
+                                EmailConfirmed = true
+                            };
+
+                            var result = await _userManager.CreateAsync(user, "Password123!");
+                            if (result.Succeeded)
+                            {
+                                await _userManager.AddToRoleAsync(user, "Lecturer");
+                            }
+                            else
+                            {
+                                errorCount++;
+                                errors.Add($"Line {lineNumber}: Created lecturer but failed to create login: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                            }
+
                             importedCount++;
                         }
                     }
