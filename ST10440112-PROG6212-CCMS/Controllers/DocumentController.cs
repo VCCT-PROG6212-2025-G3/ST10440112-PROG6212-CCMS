@@ -12,15 +12,18 @@ namespace ST10440112_PROG6212_CCMS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IFileEncryptionService _encryptionService;
+        private readonly IWebHostEnvironment _environment;
         private readonly ILogger<DocumentController> _logger;
 
         public DocumentController(
             ApplicationDbContext context,
             IFileEncryptionService encryptionService,
+            IWebHostEnvironment environment,
             ILogger<DocumentController> logger)
         {
             _context = context;
             _encryptionService = encryptionService;
+            _environment = environment;
             _logger = logger;
         }
 
@@ -60,8 +63,10 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                     return Forbid();
                 }
 
-                // Get file path from document URL
-                var filePath = document.Url;
+                // Get file path from document URL and construct full path
+                var relativePath = document.Url;
+                var filePath = Path.Combine(_environment.WebRootPath, relativePath);
+
                 if (!System.IO.File.Exists(filePath))
                 {
                     _logger.LogError($"File not found on disk: {filePath}");
@@ -121,8 +126,10 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                     return Forbid();
                 }
 
-                // Get file path
-                var filePath = document.Url;
+                // Get file path and construct full path
+                var relativePath = document.Url;
+                var filePath = Path.Combine(_environment.WebRootPath, relativePath);
+
                 if (!System.IO.File.Exists(filePath))
                 {
                     return NotFound("File not found on the server.");
