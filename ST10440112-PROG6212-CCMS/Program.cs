@@ -89,20 +89,13 @@ namespace ST10440112_PROG6212_CCMS
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            // Apply pending migrations automatically
+            // Initialize database with correct schema
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                try
-                {
-                    context.Database.Migrate();
-                }
-                catch
-                {
-                    // If migration fails (e.g., due to schema conflicts), recreate the database
-                    context.Database.EnsureDeleted();
-                    context.Database.EnsureCreated();
-                }
+                // Delete and recreate the database to ensure correct schema matching current models
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
             }
 
             // Seed roles and users
