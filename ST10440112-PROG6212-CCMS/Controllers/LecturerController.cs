@@ -99,7 +99,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 var claim = new ClaimModel
                 {
                     LecturerId = lecturer.LecturerId,
-                    HourlyRate = (int)lecturer.HourlyRate,
+                    HourlyRate = lecturer.HourlyRate,
                     ClaimDate = DateTime.Now,
                     SubmissionDate = DateTime.Now
                 };
@@ -137,7 +137,7 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                 // Ensure the claim belongs to the authenticated lecturer
                 claim.LecturerId = lecturer.LecturerId;
                 // Force hourly rate from lecturer record (prevent tampering)
-                claim.HourlyRate = (int)lecturer.HourlyRate;
+                claim.HourlyRate = lecturer.HourlyRate;
                 claim.ClaimStatus = "Pending";
                 claim.SubmissionDate = DateTime.Now;
 
