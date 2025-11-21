@@ -135,19 +135,25 @@ namespace ST10440112_PROG6212_CCMS.Controllers
                     return NotFound("File not found on the server.");
                 }
 
-                // Decrypt the file
-                var decryptResult = await _encryptionService.DecryptFileAsync(filePath);
-                if (!decryptResult.Success || decryptResult.DecryptedData == null)
+                // Use streaming for better performance when viewing large files
+                try
                 {
+                    using var encryptedStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                    var decryptedStream = await _encryptionService.DecryptStreamAsync(encryptedStream);
+
+                    // Determine content type based on file extension
+                    var fileExtension = document.DocType?.ToLower();
+                    var contentType = GetContentType(fileExtension);
+
+                    // Return the decrypted stream for inline viewing
+                    // The decrypted stream is a MemoryStream which will be properly disposed by the framework
+                    return File(decryptedStream, contentType);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error viewing document: {documentId}");
                     return StatusCode(500, "Failed to process file.");
                 }
-
-                // Determine content type based on file extension
-                var fileExtension = document.DocType?.ToLower();
-                var contentType = GetContentType(fileExtension);
-
-                // Return the decrypted file for inline viewing
-                return File(decryptResult.DecryptedData, contentType);
             }
             catch (Exception ex)
             {
