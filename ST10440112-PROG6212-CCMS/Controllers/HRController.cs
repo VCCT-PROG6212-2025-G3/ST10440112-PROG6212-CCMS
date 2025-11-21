@@ -127,6 +127,144 @@ namespace ST10440112_PROG6212_CCMS.Controllers
             return View(lecturer);
         }
 
+        // GET: HR/CreateUser
+        public IActionResult CreateUser()
+        {
+            ViewBag.Roles = new List<string> { "Lecturer", "ProgrammeCoordinator", "AcademicManager", "HR" };
+            return View();
+        }
+
+        // POST: HR/CreateUser
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser(string fullName, string email, string role, decimal? hourlyRate)
+        {
+            ViewBag.Roles = new List<string> { "Lecturer", "ProgrammeCoordinator", "AcademicManager", "HR" };
+
+            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(role))
+            {
+                ModelState.AddModelError(string.Empty, "All fields are required.");
+                return View();
+            }
+
+            try
+            {
+                // Check if user already exists
+                var existingUser = await _userManager.FindByEmailAsync(email);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("email", "A user with this email already exists.");
+                    return View();
+                }
+
+                // If role is Lecturer, create Lecturer profile first
+                Guid? lecturerId = null;
+                if (role == "Lecturer")
+                {
+                    if (!hourlyRate.HasValue || hourlyRate.Value <= 0)
+                    {
+                        ModelState.AddModelError("hourlyRate", "Hourly rate is required for lecturers and must be greater than 0.");
+                        return View();
+                    }
+
+                    // Check if lecturer profile exists
+                    if (await _context.Lecturers.AnyAsync(l => l.Email == email))
+                    {
+                        ModelState.AddModelError("email", "A lecturer with this email already exists.");
+                        return View();
+                    }
+
+                    var lecturer = new Lecturer
+                    {
+                        LecturerId = Guid.NewGuid(),
+                        Name = fullName,
+                        Email = email,
+                        Department = "Unspecified", // Can be updated later
+                        HourlyRate = hourlyRate.Value
+                    };
+
+                    _context.Lecturers.Add(lecturer);
+                    await _context.SaveChangesAsync();
+                    lecturerId = lecturer.LecturerId;
+                }
+
+                // Create AppUser
+                var user = new AppUser
+                {
+                    UserName = email,
+                    Email = email,
+                    FullName = fullName,
+                    Role = role,
+                    LecturerId = lecturerId,
+                    EmailConfirmed = true
+                };
+
+                var result = await _userManager.CreateAsync(user, "Password123!"); // Default password
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, role);
+                    
+                    _logger.LogInformation($"HR created new user: {email} with role: {role}");
+                    
+                    TempData["SuccessMessage"] = $"User '{fullName}' created successfully as {role} with default password 'Password123!'";
+                    return RedirectToAction("ManageUsers");
+                }
+                else
+                {
+                    // If user creation failed and we created a lecturer, remove it
+                    if (lecturerId.HasValue)
+                    {
+                        var lecturer = await _context.Lecturers.FindAsync(lecturerId.Value);
+                        if (lecturer != null)
+                        {
+                            _context.Lecturers.Remove(lecturer);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+
+                    ModelState.AddModelError(string.Empty, $"User creation failed: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating user");
+                ModelState.AddModelError(string.Empty, "An error occurred while creating the user.");
+            }
+
+            return View();
+        }
+
+        // GET: HR/ManageUsers
+        public async Task<IActionResult> ManageUsers(string searchTerm = "", string roleFilter = "")
+        {
+            try
+            {
+                IQueryable<AppUser> query = _context.Users;
+
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    query = query.Where(u => u.FullName.Contains(searchTerm) || u.Email.Contains(searchTerm));
+                }
+
+                if (!string.IsNullOrEmpty(roleFilter))
+                {
+                    query = query.Where(u => u.Role == roleFilter);
+                }
+
+                var users = await query.OrderBy(u => u.FullName).ToListAsync();
+                
+                ViewBag.Roles = new List<string> { "All", "Lecturer", "ProgrammeCoordinator", "AcademicManager", "HR" };
+                ViewBag.CurrentFilter = roleFilter;
+                
+                return View(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading users");
+                return View(new List<AppUser>());
+            }
+        }
+
         // GET: HR/EditLecturer/{id}
         public async Task<IActionResult> EditLecturer(Guid? id)
         {
